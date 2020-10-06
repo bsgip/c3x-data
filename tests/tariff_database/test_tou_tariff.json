@@ -1,0 +1,121 @@
+{
+    "rates": [
+        {
+            "name": "summer morning off-peak",
+            "rate": 0.1,
+            "months": [0,1,2,10,11],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 0,
+            "to_hour": 6
+        },
+        {
+            "name": "summer morning peak",
+            "rate": 0.3,
+            "months": [0,1,2,10,11],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 6,
+            "to_hour": 8
+        },
+        {
+            "name": "summer shoulder",
+            "rate": 0.2,
+            "months": [0,1,2,10,11],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 8,
+            "to_hour": 16
+        },
+        {
+            "name": "summer evening peak",
+            "rate": 0.3,
+            "months": [0,1,2,10,11],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 16,
+            "to_hour": 20
+        },
+        {
+            "name": "summer evening off-peak",
+            "rate": 0.1,
+            "months": [0,1,2,10,11],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 20,
+            "to_hour": 24
+        },
+        {
+            "name": "winter morning off-peak",
+            "rate": 0.1,
+            "months": [3,4,5,6,7,8,9],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 0,
+            "to_hour": 6
+        },
+        {
+            "name": "winter morning peak",
+            "rate": 0.3,
+            "months": [3,4,5,6,7,8,9],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 6,
+            "to_hour": 8
+        },
+        {
+            "name": "winter shoulder",
+            "rate": 0.2,
+            "months": [3,4,5,6,7,8,9],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 8,
+            "to_hour": 16
+        },
+        {
+            "name": "winter evening peak",
+            "rate": 0.3,
+            "months": [3,4,5,6,7,8,9],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 16,
+            "to_hour": 20
+        },
+        {
+            "name": "winter evening off-peak",
+            "rate": 0.1,
+            "months": [3,4,5,6,7,8,9],
+            "from_weekday": 0,
+            "to_weekday": 4,
+            "from_hour": 20,
+            "to_hour": 24
+        },
+        {
+            "name": "weekend off-peak",
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "rate": 0.1,
+            "from_weekday": 5,
+            "to_weekday": 6,
+            "from_hour": 0,
+            "to_hour": 6
+        },
+        {
+            "name": "weekend shoulder",
+            "rate": 0.2,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 5,
+            "to_weekday": 6,
+            "from_hour": 6,
+            "to_hour": 21
+        },
+        {
+            "name": "weekend off-peak evening",
+            "rate": 0.1,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 5,
+            "to_weekday": 6,
+            "from_hour": 21,
+            "to_hour": 24
+        }
+    ]
+}

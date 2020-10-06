@@ -1,0 +1,18 @@
+"""
+    Extracts each connections points requested form the original set of data.
+    the data from those connections points is saved as evolve core network objects in pickeld numpy files
+    Each node is  saved separate in a files named node_$ID.npy
+"""
+
+from c3x.data_loaders import nextgen_loaders
+
+#cause data to be read and stored separatly per type and per node and batch
+nextgen = nextgen_loaders.NextGenData('NextGen', '/home/meike/raw_next_gen_data')
+
+#concatenete batches to one fileper node per type
+nextgen.concat_data("loads")
+nextgen.concat_data("batteries")
+nextgen.concat_data("solar")
+
+#converts the data to simulation ready data
+nextgen.to_measurement_data()

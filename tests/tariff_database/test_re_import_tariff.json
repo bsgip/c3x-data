@@ -1,0 +1,49 @@
+{
+    "rates": [
+        {
+            "name": "remote_energy_import",
+            "rate": 0.05,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 0,
+            "to_weekday": 6,
+            "from_hour": 0,
+            "to_hour": 6
+        },
+        {
+            "name": "remote_energy_import",
+            "rate": 0.25,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 0,
+            "to_weekday": 6,
+            "from_hour": 6,
+            "to_hour": 8
+        },
+        {
+            "name": "remote_energy_import",
+            "rate": 0.1,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 0,
+            "to_weekday": 6,
+            "from_hour": 8,
+            "to_hour": 16
+        },
+        {
+            "name": "remote_energy_import",
+            "rate": 0.25,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 0,
+            "to_weekday": 6,
+            "from_hour": 16,
+            "to_hour": 20
+        },
+        {
+            "name": "remote_energy_import",
+            "rate": 0.05,
+            "months": [0,1,2,3,4,5,6,7,8,9,10,11],
+            "from_weekday": 0,
+            "to_weekday": 6,
+            "from_hour": 20,
+            "to_hour": 24
+        }
+    ]
+}
