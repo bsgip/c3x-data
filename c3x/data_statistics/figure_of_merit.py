@@ -10,7 +10,7 @@
 
 import numpy
 import pandas as pd
-from c3e_data_preparation.preparation import unit_conversion
+from c3x.data_cleaning import unit_conversion
 
 
 def meter_power(meas_dict: dict, meter: int, axis: int = 0) -> pd.Series:
@@ -91,6 +91,8 @@ def customer_financial(meas_dict: dict, node_keys: list = None, tariff: dict = N
     nodes = node_keys if node_keys else meas_dict.keys()
 
     for key in nodes:
+        if type(key) == int:
+            key = key.tostr()
         if meas_dict[key]:
             if key in tariff:
                 meter_p = meter_power(meas_dict, key, axis=0)
@@ -260,6 +262,8 @@ def peak_powers(meas_dict: dict, node_keys: list = None) -> dict:
     sum_meter_power = pd.DataFrame([])
 
     for key in nodes:
+        if type(key) == int:
+            key = key.tostr()
         if meas_dict[key]:
             meter_p = meter_power(meas_dict, key, axis=1)
             if sum_meter_power.empty:
@@ -415,12 +419,11 @@ def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None) -
 
     results_dict = {}
 
-    if node_keys:
-        nodes = node_keys
-    else:
-        nodes = meas_dict.keys()
+    nodes = node_keys if node_keys else meas_dict.keys()
 
     for key in nodes:
+        if type(key) == int:
+            key = key.tostr()
         if meas_dict[key]:
             load_p = pd.DataFrame([])
             solar_p = pd.DataFrame([])
@@ -467,12 +470,11 @@ def network_net_power(meas_dict: dict, node_keys: list = None) -> dict:
          dictionary of net_load, net_import, net_export
     """
 
-    if node_keys:
-        nodes = node_keys
-    else:
-        nodes = meas_dict.keys()
+    nodes = node_keys if node_keys else meas_dict.keys()
 
     for key in nodes:
+        if type(key) == int:
+            key = key.tostr()
         if meas_dict[key]:
             load_p = pd.DataFrame([])
             solar_p = pd.DataFrame([])
@@ -519,6 +521,8 @@ def solar_kwh_per_kw(meas_dict: dict, node_info: pd.DataFrame, node_keys: list =
     nodes = node_keys if node_keys else meas_dict.keys()
 
     for key in nodes:
+        if type(key) == int:
+            key = key.tostr()
         if meas_dict[key]:
             solar_power = pd.DataFrame([])
             solar_capacity = 0
