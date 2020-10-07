@@ -12,7 +12,7 @@ measurement data set)
 import pandas as pd
 import numpy as np
 import json
-from c3e_data_preparation.preparation import unit_conversion
+from c3x.data_cleaning import unit_conversion
 
 DAYS_IN_WEEK = 7
 HOURS_IN_DAY = 24
