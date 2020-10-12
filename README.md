@@ -6,10 +6,10 @@ Tools for analysing typical data relevant to investigations of Battery, Storage 
 Structure
 --------------------
 
-This package (currently) contains two modules:
-1. loaders, whose functions read in data sets and structure them into data structure.
+This package (currently) contains three modules:
+1. loaders, whose functions read in data sets and restructure it into data structures.
 2. statistics, whose functions read data sets and analyse the quality of data
-3. cleaners, whose functions read data sets and clean it according user configurations 
+3. cleaners, whose functions read a data sets and clean it according user configurations 
 (e.G configuration file)
 
 Conventions
