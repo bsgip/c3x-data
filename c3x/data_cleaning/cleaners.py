@@ -306,9 +306,8 @@ def remove_positive_values(dataframe: pd.DataFrame, data_replacement: str = 'non
     to be faulty data points. The cleaning method can be specified using the different
     parameters.
 
-    Data replacement describes how  an error should be handled. None will remove all
-    duplicate timestamps without refilling. One of the following data replacements methods
-    must be used:
+    Data replacement describes how an error should be handled.
+    One of the following data replacements methods must be used:
         drop: NANs are dropped.
         zero: Fills all NANs with 0 (value).
         nan: Fills negative values with NaN's.
@@ -549,19 +548,20 @@ def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
     """
     if timestamp_start is None:
         print("start index was not provided")
-        timestamp_start = 0
+        timestamp_start = dataframe.first_valid_index()
 
     if timestamp_end is None:
         print("end index is not provided")
-        timestamp_end = len(dataframe)
+        timestamp_end = dataframe.last_valid_index()
 
     dataframe = dataframe.sort_index()
-    reduced_dataframe = dataframe.truncate(before=timestamp_start, after=timestamp_end)
+    print(timestamp_start, timestamp_end)
+    reduced_dataframe = dataframe[(dataframe.index > timestamp_start) & (dataframe.index < timestamp_end)]
 
     return reduced_dataframe
 
 
-def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_unit: str = 'm',
+def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_unit: str = 'min',
              resampling_strategy_upsampling: str = 'first') -> pd.DataFrame:
     """Resample data to desired spacing. 
     
@@ -740,18 +740,39 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
 
 
 def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
-                     resampling_unit: str = "m") -> pd.DataFrame:
+                     resampling_unit: str = "min", timestamp_start: int = None,
+                     timestamp_end: int = None) -> pd.DataFrame:
     """ forces a full index. Missing index will be replaced by Nan
 
         Args:
             dataframe(dataframe): data frame containing NaN values
             resampling_step (int, 8): This is the desired time step of final dataframe.
-            resampling_unit (str, 'm'): unit of desired time step
-        Retruns
+            resampling_unit (str, 'min'): unit of desired time step
+            timestamp_start (int, none): index at which the dataframe starts
+            timestamp_end (int, none): index at which the dataframe ends
+        Returns
             dataframe(pandas.Dataframe): dataframe with full index
     """
-    # create a dataframe with a full index
-    delta_time_tmp = pd.to_timedelta(resampling_step, resampling_unit)
+
+    if timestamp_start is None:
+        print("start index was not provided")
+        timestamp_start = dataframe.first_valid_index()
+
+    if timestamp_end is None:
+        print("end index is not provided")
+        timestamp_end = dataframe.last_valid_index()
+
+    freq = str(resampling_step) + resampling_unit
+    print(freq, type(timestamp_start), type(timestamp_end))
+    range = pd.date_range(timestamp_start, timestamp_end, freq=freq)
+    temp_df = pd.DataFrame({'Date': range})
+    temp_df.set_index("Date")
+
+    print("new dataframe:", temp_df)
+
+    delta_time_tmp = pd.concat(temp_df, dataframe)
+    print("concatenate:", delta_time_tmp)
+
     delta_time_tmp = pd.to_timedelta(delta_time_tmp, 's')
 
     dataframe['ts'] = pd.to_datetime(dataframe.index, unit='s')
