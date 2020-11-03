@@ -56,6 +56,7 @@ class ConfigFileParser:
             solar:/some/path/to/folder
             node:/some/path/to/folder
             loads:/some/path/to/folder
+            tariffs: /some/path/to/folder
 
         Returns:
             data_path_dict (dict): Dictionary with configuration values for file batching
@@ -87,9 +88,9 @@ class ConfigFileParser:
 
             if time_filter_dict["time_filter_use"]:
                 time_filter_dict["start_time"] = datetime.datetime.strptime(
-                    time_filter_dict["start_time"], "%Y-%m-%d %H:%M").strftime("%s")
+                    time_filter_dict["start_time"], "%Y-%m-%d %H:%M")
                 time_filter_dict["end_time"] = datetime.datetime.strptime(
-                    time_filter_dict["end_time"], "%Y-%m-%d %H:%M").strftime("%s")
+                    time_filter_dict["end_time"], "%Y-%m-%d %H:%M")
 
         print("time filter: ", time_filter_dict)
         return time_filter_dict
@@ -226,17 +227,19 @@ class ConfigFileParser:
 
 
     def read_refill(self) -> dict:
-        """Reads the nan handling section from config file and converts it to a dictionary that is
+        """Reads the refill section from config file and converts it to a dictionary that is
         typecasted.
 
         Variables read into the dictionary:
-            nan_removal:True/False
-            data_replacement:drop/zero/first/last/none/average/max/remove
-            removal_time_frame:day/hour/all
-            fault_placement:start/middle/end/calendar
+            data_refill(bool) :True/False
+            days (int) : 7
+            attempts: 7
+            threshold: 5
+            forward_fill = True
+            backward_fill = True
 
         Returns:
-            nan_handling_dict (dict): dictionary with configuration values for nan handling
+            refill_dict (dict): dictionary with configuration values for refilling data
         """
         refill_dict = dict(self.config.items("Refill")) \
             if "Refill" in self.config else {}
@@ -254,3 +257,149 @@ class ConfigFileParser:
 
         print("Refill: ", refill_dict)
         return refill_dict
+
+    def read_optimiser_objective_set(self) -> str:
+        """ Reads the optimiser Set from config file.
+
+            Returns:
+                String with name of the optimiser set to be used
+        """
+        optimiser_set_dict = dict(self.config.items("Optimiser Objective Set"))\
+            if "Optimiser Objective Set" in self.config else {}
+
+        optimiser_set_name = optimiser_set_dict["optimiserobjectiveset"]
+
+        print("optimiser set: ", optimiser_set_name)
+        return optimiser_set_name
+
+    def read_optimiser_objectives(self) -> list:
+        """ Reads the optimiser objectives from config file.
+
+            Returns:
+                List with name of the objectives choosen to be used
+        """
+        optimiser_objectives_dict = dict(self.config.items("Optimiser Objectives"))\
+            if "Optimiser Objectives" in self.config else {}
+        optimiser_objectives_list = []
+
+        if optimiser_objectives_dict:
+            if self.config["Optimiser Objectives"].getboolean("ConnectionPointCost", fallback=False):
+                optimiser_objectives_list.append("ConnectionPointCost")
+            if self.config["Optimiser Objectives"].getboolean("ConnectionPointEnergy", fallback=False):
+                optimiser_objectives_list.append("ConnectionPointEnergy")
+            if self.config["Optimiser Objectives"].getboolean("ThroughputCost", fallback=False):
+                optimiser_objectives_list.append("ThroughputCost")
+            if self.config["Optimiser Objectives"].getboolean("Throughput", fallback=False):
+                optimiser_objectives_list.append("Throughput")
+            if self.config["Optimiser Objectives"].getboolean("GreedyGenerationCharging", fallback=False):
+                optimiser_objectives_list.append("GreedyGenerationCharging")
+            if self.config["Optimiser Objectives"].getboolean("GreedyDemandDischarging", fallback=False):
+                optimiser_objectives_list.append("GreedyDemandDischarging")
+            if self.config["Optimiser Objectives"].getboolean("EqualStorageActions", fallback=False):
+                optimiser_objectives_list.append("EqualStorageActions")
+            if self.config["Optimiser Objectives"].getboolean("ConnectionPointPeakPower", fallback=False):
+                optimiser_objectives_list.append("ConnectionPointPeakPower")
+            if self.config["Optimiser Objectives"].getboolean("ConnectionPointQuantisedPeak", fallback=False):
+                optimiser_objectives_list.append("ConnectionPointQuantisedPeak")
+            if self.config["Optimiser Objectives"].getboolean("PiecewiseLinear", fallback=False):
+                optimiser_objectives_list.append("PiecewiseLinear")
+            if self.config["Optimiser Objectives"].getboolean("LocalModelsCost", fallback=False):
+                optimiser_objectives_list.append("LocalModelsCost")
+            if self.config["Optimiser Objectives"].getboolean("LocalGridMinimiser", fallback=False):
+                optimiser_objectives_list.append("LocalGridMinimiser")
+            if self.config["Optimiser Objectives"].getboolean("LocalThirdParty", fallback=False):
+                optimiser_objectives_list.append("LocalThirdParty")
+            if self.config["Optimiser Objectives"].getboolean("LocalGridPeakPower", fallback=False):
+                optimiser_objectives_list.append("LocalGridPeakPower")
+
+        print("Objectives: ", optimiser_objectives_list)
+        return optimiser_objectives_list
+
+    def read_inverter(self) -> dict:
+        """ Reads the inverters from config file.
+
+            Returns:
+                dict with inverter settings
+        """
+
+        inverter_dict = dict(self.config.items("Inverter")) \
+            if "Inverters" in self.config else {}
+
+        inverter_dict["charging_power_limit"] = self.config["Inverter"].getfloat("charging_power_limit")
+        inverter_dict["discharging_power_limit"] = self.config["Inverter"].getfloat("discharging_power_limit")
+        inverter_dict["charging_efficiency"] = self.config["Inverter"].getfloat("charging_efficiency")
+        inverter_dict["discharging_efficiency"] = self.config["Inverter"].getfloat("discharging_efficiency")
+        inverter_dict["charging_reactive_power_limit"] = self.config["Inverter"].getfloat("charging_reactive_power_limit")
+        inverter_dict["discharging_reactive_power_limit"] = self.config["Inverter"].getfloat("discharging_reactive_power_limit")
+        inverter_dict["reactive_charging_efficiency"] = self.config["Inverter"].getfloat("reactive_charging_efficiency")
+        inverter_dict["reactive_discharging_efficiency"] = self.config["Inverter"].getfloat("reactive_discharging_efficiency")
+
+        print("Inerter: ", inverter_dict)
+        return inverter_dict
+
+    def read_energy_storage(self) -> dict:
+        """ Reads the energy storage from config file.
+
+            Returns:
+                dict with energy storage settings
+        """
+
+        energy_storage_dict = dict(self.config.items("EnergyStorage")) \
+            if "EnergyStorage" in self.config else {}
+
+        energy_storage_dict["node_id"] = self.config["EnergyStorage"].getint("node_id")
+        energy_storage_dict["max_capacity"] = self.config["EnergyStorage"].getfloat("max_capacity")
+        energy_storage_dict["depth_of_discharge_limit"] = self.config["EnergyStorage"].getfloat("depth_of_discharge_limit")
+        energy_storage_dict["charging_power_limit"] = self.config["EnergyStorage"].getfloat("charging_power_limit")
+        energy_storage_dict["discharging_power_limit"] = self.config["EnergyStorage"].getfloat("discharging_power_limit")
+        energy_storage_dict["charging_efficiency"] = self.config["EnergyStorage"].getfloat("charging_efficiency")
+        energy_storage_dict["discharging_efficiency"] = self.config["EnergyStorage"].getfloat("discharging_efficiency")
+        energy_storage_dict["throughput_cost"] = self.config["EnergyStorage"].getfloat("throughput_cost")
+        energy_storage_dict["initial_state_of_charge"] = self.config["EnergyStorage"].getfloat("initial_state_of_charge")
+
+        print("energy storage: ", energy_storage_dict)
+        return energy_storage_dict
+
+    def read_energy_system(self) -> dict:
+        """ Reads the energy system from config file.
+        
+            Returns:
+                dict with energy system compoments
+        """
+
+        energy_system_dict = dict(self.config.items("EnergySystem")) \
+            if "EnergySystem" in self.config else {}
+
+        energy_system_dict["energy_storage"] = self.config["EnergySystem"].getboolean("energy_storage", fallback=False)
+        energy_system_dict["inverter"] = self.config["EnergySystem"].getboolean("inverter", fallback=False)
+        energy_system_dict["generation"] = self.config["EnergySystem"].getboolean("generation", fallback=False)
+        energy_system_dict["is_hybrid"] = self.config["EnergySystem"].getboolean("is_hybrid", fallback=False)
+
+        print("energy system: ", energy_system_dict)
+        return energy_system_dict
+
+    def read_tariff_factors(self) -> dict:
+        """ Reads the tariff factors from config file.
+
+            Returns:
+                dict with tariff factors
+        """
+
+        tariff_Factors_dict = dict(self.config.items("TariffFactors")) \
+            if "TariffFactors" in self.config else {}
+
+        tariff_Factors_dict["lt_i_factor"] = self.config["TariffFactors"].getfloat("lt_i_factor")
+        tariff_Factors_dict["lt_e_factor"] = self.config["TariffFactors"].getfloat("lt_e_factor")
+        tariff_Factors_dict["rt_e_factor"] = self.config["TariffFactors"].getfloat("rt_e_factor")
+        tariff_Factors_dict["rt_i_factor"] = self.config["TariffFactors"].getfloat("rt_i_factor")
+        tariff_Factors_dict["subscription_fee"] = self.config["TariffFactors"].getfloat("subscription_fee")
+
+        print("traiff factors: ", tariff_Factors_dict)
+        return tariff_Factors_dict
+
+    def read_scenario_info(self) ->dict:
+        scenario_dict = dict(self.config.items("Scenario")) \
+            if "Scenario" in self.config else {}
+
+        print("Scenario Information: ", scenario_dict)
+        return scenario_dict
