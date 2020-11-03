@@ -82,7 +82,7 @@ solar_result = figure_of_merit.solar_kwh_per_kw(cleaned_data, node_info)
 print("Average solar performance ", numpy.round(solar_result["average"], decimals=2), 'kWh/kW')
 
 # Tariffs are in $ / kwh
-data_location = '../../tariffs/tariff_database/'
+data_location = '../tests/tariff_database/'
 local_tz = 'Australia/Sydney'
 
 tariff_dict = {}
@@ -102,7 +102,7 @@ for node in cleaned_data:
     tariff_dict[node] = tariff_info
 
 FoM_financial_raw = figure_of_merit.customer_financial(cleaned_data, node_keys=None, tariff=tariff_dict)
-
+print(FoM_financial_raw)
 print('------ Measured data ------')
 print("Average cost per connection point $", numpy.round(FoM_financial_raw["average"], decimals=2))
 print("Note this cost doesn't account for missing data")
