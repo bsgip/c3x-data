@@ -456,8 +456,8 @@ def network_net_power(meas_dict: dict, node_keys: list = None) -> dict:
     (ignoring network structure and losses etc).
     Import and Export are the net_load with all values set to zero, which are not matching.
 
-    Note: net_load is calculated by using load, solar and batterie values for each node at each
-    time. If you load already has solar factored into it, then you should not pass the solar data
+    Note: net_load is calculated by using load, solar and battery values for each node at each
+    time. If your load already has solar factored into it, then you should not pass the solar data
     on as a separate column in your measurement dict
 
     #TODO: consider inverters and how to avoid double counting with solar, batteries
@@ -490,12 +490,14 @@ def network_net_power(meas_dict: dict, node_keys: list = None) -> dict:
     net_load = pd.DataFrame([])
     net_load = pd.concat((net_load, load_p, solar_p, battery_p), axis=1).sum(axis=1)
 
-    #create an array that contains which entries are import and which are export
-    mask_import = (net_load >= 0)
-    mask_export = (net_load < 0)
-
-    net_import = numpy.copy(net_load) * mask_import
-    net_export = numpy.copy(net_load) * mask_export
+    # create an array that contains which entries are import and which are export
+    net_import = numpy.copy(net_load)
+    net_export = numpy.copy(net_load)
+    for j, e in enumerate(net_load):
+        if e >= 0:
+            net_export[j] = 0
+        else:
+            net_import[j] = 0
 
     return {'net_load': net_load, 'net_import': net_import, 'net_export': net_export}
 
