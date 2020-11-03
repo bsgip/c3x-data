@@ -1,7 +1,7 @@
 """
     Extracts each node from a file and cleans the data. The cleaning is based on example_for_refill.
     The cleaning is arranged in a way that all function use NaN to fill replace errors.
-    This leaas to NaN blocks in the data and the data refiller can attempt to refill that with
+    This leads to NaN blocks in the data and the data refiller can attempt to refill that with
     data. After that
     Each node is  saved separate in a files named node_$ID.npy
 """
