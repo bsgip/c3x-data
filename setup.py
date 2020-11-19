@@ -10,14 +10,14 @@ install_requires = [
 ]
 
 setuptools.setup(
-    name="c3e_data_preparation",
+    name="c3x-data",
     version="0.0.1",
     author="BSGIP",
     description="For data analysis and preparation",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url=None,
-    packages=setuptools.find_packages(),
+    packages=['c3x.data_cleaning', 'c3x.data_loaders', 'c3x.data_statistics'],
     classifiers=[
     ],
     install_requires=install_requires,
