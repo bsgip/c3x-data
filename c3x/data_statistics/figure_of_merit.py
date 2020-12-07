@@ -13,7 +13,7 @@ import pandas as pd
 from c3x.data_cleaning import unit_conversion
 
 
-def meter_power(meas_dict: dict, meter: int, axis: int = 0) -> pd.Series:
+def meter_power(meas_dict: dict, meter: int, axis: int = 0, column: int = 0) -> pd.Series:
     """
     calculates the power for a meter of individual measurement points
     by summing load, solar and battery power
@@ -22,6 +22,7 @@ def meter_power(meas_dict: dict, meter: int, axis: int = 0) -> pd.Series:
        meas_dict (dict): dict with measurement for one or multiple nodes.
        meter(int): Id for a meter
        axis (int): how data is concatenated for results
+       column (int): column index to be used
 
     return:
         meter_p (pd.Series): combined power (solar, battery, load)
@@ -32,11 +33,11 @@ def meter_power(meas_dict: dict, meter: int, axis: int = 0) -> pd.Series:
         meter_p = pd.DataFrame()
         for meas in meas_dict[meter]:
             if 'loads' in meas:
-                meter_p = pd.concat([meter_p, meas_dict[meter][meas]["PLG"]], axis=axis)
+                meter_p = pd.concat([meter_p, meas_dict[meter][meas].iloc[:,column]], axis=axis)
             elif 'solar' in meas:
-                meter_p = pd.concat([meter_p, meas_dict[meter][meas]["PLG"]], axis=axis)
+                meter_p = pd.concat([meter_p, meas_dict[meter][meas].iloc[:,column]], axis=axis)
             elif 'batteries' in meas:
-                meter_p = pd.concat([meter_p, meas_dict[meter][meas]["PLG"]], axis=axis)
+                meter_p = pd.concat([meter_p, meas_dict[meter][meas].iloc[:,column]], axis=axis)
     meter_p = meter_p.sum(axis=1)
     return meter_p
 
@@ -60,8 +61,8 @@ def financial(meter_p: pd.Series, import_tariff: pd.Series, export_tariff: pd.Se
     timestep = numpy.timedelta64(meter_p.index[1] - meter_p.index[0])
     meter = unit_conversion.convert_watt_to_watt_hour(meter_p, timedelta=timestep)
 
-    import_power_cost = numpy.sum(meter >= 0)
-    export_power_revenue = numpy.sum(meter < 0)
+    import_power_cost = meter.where(meter >= 0).fillna(value=0.0)
+    export_power_revenue = meter.where(meter < 0).fillna(value=0.0)
 
     cost = import_power_cost * import_tariff + export_power_revenue*export_tariff
 
@@ -92,10 +93,10 @@ def customer_financial(meas_dict: dict, node_keys: list = None, tariff: dict = N
 
     for key in nodes:
         if type(key) == int:
-            key = key.tostr()
+            key = str(key)
         if meas_dict[key]:
             if key in tariff:
-                meter_p = meter_power(meas_dict, key, axis=0)
+                meter_p = meter_power(meas_dict, key, axis=1)
                 meter_p_cost = financial(meter_p,
                                          tariff[key]['import_tariff'],
                                          tariff[key]['export_tariff'])
@@ -263,7 +264,7 @@ def peak_powers(meas_dict: dict, node_keys: list = None) -> dict:
 
     for key in nodes:
         if type(key) == int:
-            key = key.tostr()
+            key = str(key)
         if meas_dict[key]:
             meter_p = meter_power(meas_dict, key, axis=1)
             if sum_meter_power.empty:
@@ -400,7 +401,7 @@ def self_sufficiency_self_consumption_average(self_consumption_self_sufficiency_
             "av_self_consumption_batteries": av_self_consumption_batteries}
 
 
-def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None) -> dict:
+def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None, column: int = 0) -> dict:
     """
         Self-sufficiency = 1 - imports / consumption
         Self-consumption = 1 - exports / generation
@@ -411,6 +412,7 @@ def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None) -
         Args:
             meas_dict (dict): dict with measurement for one or multiple nodes.
             node_keys  (list): list of Node.names in Network.nodes.
+            column (int): Column index used for calculation
 
         Returns:
             results_dict: self_sufficiency_solar, self_sufficiency_batteries,
@@ -421,22 +423,23 @@ def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None) -
 
     nodes = node_keys if node_keys else meas_dict.keys()
 
+
     for key in nodes:
         if type(key) == int:
-            key = key.tostr()
+            key = str(key)
         if meas_dict[key]:
-            load_p = pd.DataFrame([])
-            solar_p = pd.DataFrame([])
-            battery_p = pd.DataFrame([])
+            load_p = pd.DataFrame()
+            solar_p = pd.DataFrame()
+            battery_p = pd.DataFrame()
             for meas in meas_dict[key]:
                 data_df = meas_dict[key][meas]
                 if not data_df.empty:
                     if 'loads' in meas:
-                        load_p = pd.concat([load_p, meas_dict[key][meas]["PLG"]])
+                        load_p = pd.concat([load_p, meas_dict[key][meas].iloc[:,column]])
                     elif 'solar' in meas:
-                        solar_p = pd.concat([solar_p, meas_dict[key][meas]["PLG"]])
+                        solar_p = pd.concat([solar_p, meas_dict[key][meas].iloc[:,column]])
                     elif 'batteries' in meas:
-                        battery_p = pd.concat([battery_p, meas_dict[key][meas]["PLG"]])
+                        battery_p = pd.concat([battery_p, meas_dict[key][meas].iloc[:,column]])
 
             self_sufficiency_dict = self_sufficiency(load_p, solar_p, battery_p)
             self_consumption_dict = self_consumption(load_p, solar_p, battery_p)
@@ -450,7 +453,7 @@ def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None) -
     return results_dict
 
 
-def network_net_power(meas_dict: dict, node_keys: list = None) -> dict:
+def network_net_power(meas_dict: dict, node_keys: list = None, column: int = 0) -> dict:
     """
     Calculate the net power (kW) of the network on the point of common coupling
     (ignoring network structure and losses etc).
@@ -464,45 +467,44 @@ def network_net_power(meas_dict: dict, node_keys: list = None) -> dict:
 
     Args:
         meas_dict (dict): dict with measurement for one or multiple nodes.
-        node_keys  (): list of Node.names in Network.nodes.
+        node_keys (list): list of Node.names in Network.nodes.
+        column (int): Column index used for calculation
 
     Returns:
          dictionary of net_load, net_import, net_export
     """
 
     nodes = node_keys if node_keys else meas_dict.keys()
+    load_p = pd.DataFrame()
+    solar_p = pd.DataFrame()
+    battery_p = pd.DataFrame()
 
     for key in nodes:
         if type(key) == int:
-            key = key.tostr()
+            key = str(key)
         if meas_dict[key]:
-            load_p = pd.DataFrame([])
-            solar_p = pd.DataFrame([])
-            battery_p = pd.DataFrame([])
             for meas in meas_dict[key]:
-                if 'loads' in meas:
-                    load_p = pd.concat([load_p, meas_dict[key][meas]["PLG"]])
+                if 'load' in meas:
+                    load_p = pd.concat([load_p, meas_dict[key][meas].iloc[:,column]], axis=1)
                 elif 'solar' in meas:
-                    solar_p = pd.concat([solar_p, meas_dict[key][meas]["PLG"]])
+                    solar_p = pd.concat([solar_p, meas_dict[key][meas].iloc[:,column]], axis=1)
                 elif 'batteries' in meas:
-                    battery_p = pd.concat([battery_p, meas_dict[key][meas]["PLG"]])
+                    battery_p = pd.concat([battery_p, meas_dict[key][meas].iloc[:,column]],axis=1)
 
-    net_load = pd.DataFrame([])
-    net_load = pd.concat((net_load, load_p, solar_p, battery_p), axis=1).sum(axis=1)
+    net_load = pd.DataFrame()
+    net_load = pd.concat([net_load, load_p, solar_p, battery_p], axis=1).sum(axis=1)
 
     # create an array that contains which entries are import and which are export
     net_import = numpy.copy(net_load)
     net_export = numpy.copy(net_load)
-    for j, e in enumerate(net_load):
-        if e >= 0:
-            net_export[j] = 0
-        else:
-            net_import[j] = 0
+
+    net_import[net_import < 0] = 0
+    net_export[net_export > 0] = 0
 
     return {'net_load': net_load, 'net_import': net_import, 'net_export': net_export}
 
 
-def solar_kwh_per_kw(meas_dict: dict, node_info: pd.DataFrame, node_keys: list = None) -> dict:
+def solar_kwh_per_kw(meas_dict: dict, node_info: pd.DataFrame, node_keys: list = None, column: int = 0) -> dict:
     """
     Calculates the amount of solar energy generated per kW of rated solar capacity for all
     given meters
@@ -511,6 +513,7 @@ def solar_kwh_per_kw(meas_dict: dict, node_info: pd.DataFrame, node_keys: list =
         meas_dict (dict): dict with measurement for one or multiple nodes.
         node_info (pd.DataFrame) : Data frame with additional information on each node
         node_keys (list): list of Node ID's in the network.
+        column (int): Column index used for calculation
 
     Returns:
         results_dict(dict): rated capacity for all given meters
@@ -524,14 +527,14 @@ def solar_kwh_per_kw(meas_dict: dict, node_info: pd.DataFrame, node_keys: list =
 
     for key in nodes:
         if type(key) == int:
-            key = key.tostr()
+            key = str(key)
         if meas_dict[key]:
             solar_power = pd.DataFrame([])
             solar_capacity = 0
 
             for meas in meas_dict[key]:
                 if 'solar' in meas:
-                    solar_power = pd.concat([solar_power, meas_dict[key][meas]["PLG"]])
+                    solar_power = pd.concat([solar_power, meas_dict[key][meas].iloc[:,column]])
 
                     #calculates the overall solar power capacity
                     node_data = node_info[node_info.index == int(key)]
