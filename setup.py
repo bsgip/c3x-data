@@ -7,10 +7,11 @@ with open("README.md", "r") as fh:
 install_requires = [
     'pandas',
     'numpy',
+    'sqlalchemy'
 ]
 
 setuptools.setup(
-    name="c3e_data_preparation",
+    name="c3x-data",
     version="0.0.1",
     author="BSGIP",
     description="For data analysis and preparation",
