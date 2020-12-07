@@ -6,6 +6,7 @@
 """
 import os
 import pandas
+from time import mktime
 
 # BSGIP specific tools
 from c3x.data_loaders import configfileparser, nextgen_loaders
@@ -65,7 +66,7 @@ for file in data_files:
         node_data = pandas.read_pickle(file)
         if time["time_filter_use"]:
             print("slice dataframe to user specified time range")
-            node_data = cleaners.time_filter_data(node_data, time["start_time"], time["end_time"])
+            node_data = cleaners.time_filter_data(node_data, int(mktime(time["start_time"].timetuple())), int(mktime(time["end_time"].timetuple())))
 
         if duplicates["duplicate_removal"] and not node_data.empty:
             print("remove duplicates from time frame")
