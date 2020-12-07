@@ -148,8 +148,7 @@ def load_nem_prices(table_name, database_name, start_time=None, end_time=None, r
         """
 
     # query the right amount of data instead of reading the hol think
-    statement = "select * from " + table_name + " where 'REGIONID' == " + region
-    print(statement)
+    statement = "select * from " + table_name + " where REGIONID == '" + region +"'"
 
     # Open database to read data data in
     database = sqlalchemy.create_engine('sqlite:///' + database_name)
