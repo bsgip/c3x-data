@@ -85,12 +85,14 @@ def duplicates_remove(dataframe: pd.DataFrame,
             if removal_time_frame == 'day':
                 index_date_start, index_date_end = find_time_range_method_day(timestamp,
                                                                               fault_placement)
+
                 dataframe = slice_by_index(dataframe,
                                            timestamp_start=index_date_start,
                                            timestamp_end=index_date_end)
             elif removal_time_frame == 'hour':
                 index_date_start, index_date_end = find_time_range_method_hour(timestamp,
                                                                                fault_placement)
+
                 dataframe = slice_by_index(dataframe,
                                            timestamp_start=index_date_start,
                                            timestamp_end=index_date_end)
@@ -194,6 +196,7 @@ def handle_nans(dataframe: pd.DataFrame, data_replacement: str = 'none',
             if removal_time_frame == 'day':
                 index_date_start, index_date_end = find_time_range_method_day(timestamp,
                                                                               fault_placement)
+
                 dataframe = slice_by_index(dataframe,
                                            timestamp_start=index_date_start,
                                            timestamp_end=index_date_end)
@@ -201,6 +204,7 @@ def handle_nans(dataframe: pd.DataFrame, data_replacement: str = 'none',
             elif removal_time_frame == 'hour':
                 index_date_start, index_date_end = find_time_range_method_hour(timestamp,
                                                                                fault_placement)
+
                 dataframe = slice_by_index(dataframe,
                                            timestamp_start=index_date_start,
                                            timestamp_end=index_date_end)
@@ -282,6 +286,7 @@ def remove_negative_values(dataframe: pd.DataFrame, data_replacement: str = 'non
                 if removal_time_frame == 'day':
                     index_date_start, index_date_end = find_time_range_method_day(timestamp,
                                                                                   fault_placement)
+
                     dataframe = slice_by_index(dataframe,
                                                timestamp_start=index_date_start,
                                                timestamp_end=index_date_end)
@@ -289,6 +294,7 @@ def remove_negative_values(dataframe: pd.DataFrame, data_replacement: str = 'non
                 elif removal_time_frame == 'hour':
                     index_date_start, index_date_end = find_time_range_method_hour(timestamp,
                                                                                    fault_placement)
+
                     dataframe = slice_by_index(dataframe,
                                                timestamp_start=index_date_start,
                                                timestamp_end=index_date_end)
@@ -364,6 +370,7 @@ def remove_positive_values(dataframe: pd.DataFrame, data_replacement: str = 'non
             if removal_time_frame == 'day':
                 index_date_start, index_date_end = find_time_range_method_day(timestamp,
                                                                               fault_placement)
+
                 dataframe = slice_by_index(dataframe,
                                            timestamp_start=index_date_start,
                                            timestamp_end=index_date_end)
@@ -371,6 +378,7 @@ def remove_positive_values(dataframe: pd.DataFrame, data_replacement: str = 'non
             elif removal_time_frame == 'hour':
                 index_date_start, index_date_end = find_time_range_method_hour(timestamp,
                                                                                fault_placement)
+
                 dataframe = slice_by_index(dataframe,
                                            timestamp_start=index_date_start,
                                            timestamp_end=index_date_end)
@@ -473,6 +481,7 @@ def find_time_range_method_day(timestamp: tuple, fault_placement: str = 'start')
     """
 
     date = datetime.fromtimestamp(timestamp)
+
     if fault_placement == "start":
         # removes 24 before the timestamp
         index_date_start = date.strftime('%Y-%m-%d %H:%M')
@@ -499,8 +508,50 @@ def find_time_range_method_day(timestamp: tuple, fault_placement: str = 'start')
     index_date_start = datetime.strptime(index_date_start, "%Y-%m-%d %H:%M")
     index_date_end = datetime.strptime(index_date_end, "%Y-%m-%d %H:%M")
 
-    return mktime(index_date_start.timetuple()), mktime(index_date_end.timetuple())
+    return int(mktime(index_date_start.timetuple())), int(mktime(index_date_end.timetuple()))
 
+def find_time_range_method_calendarday(timestamp: tuple):
+    """"The method calculates the start and end time for a data removal.
+
+    The time frame considered is here 1 day.
+
+    Note: the start and end time returned is where the time frame starts and ends. If that used to
+    removed data with  pd.loc function it needs to be called twice (start of data frame to
+    start_time and end_time to end of data frame)
+
+    Todo: User should be able to choose amount of days to be removed
+
+    The timerange determine the position of the data point in the middle, at the end or at the
+    start of the data. One of the following fault placements are possible:
+        start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after
+            the fault is removed).
+        middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before
+            and after the fault is removed).
+        end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault
+            is removed).
+
+    Args:
+        timestamp (int): Timestamp in unix time around which data needs to be removed.
+        fault_placement (str, 'start'): Describes where the error is placed.
+
+    Returns:
+        start_time (datetime): Timestamp in datetime format ("%Y-%m-%d %H:%M") for the start time of
+            data removal.
+        end_time (datetime): Timestamp in datetime format ("%Y-%m-%d %H:%M") for the end time of
+            data removal.
+
+    """
+
+    date = datetime.fromtimestamp(timestamp)
+
+    index_date_start = date.strftime('%Y-%m-%d')
+    index_date_end = date + timedelta(days=1)
+    index_date_end = index_date_end.strftime('%Y-%m-%d %H:%M')
+
+    index_date_start = datetime.strptime(index_date_start, "%Y-%m-%d %H:%M")
+    index_date_end = datetime.strptime(index_date_end, "%Y-%m-%d %H:%M")
+
+    return int(mktime(index_date_start.timetuple())), int(mktime(index_date_end.timetuple()))
 
 def slice_by_index(dataframe: pd.DataFrame, timestamp_start: int = None,
                    timestamp_end: int = None) -> pd.DataFrame:
@@ -546,6 +597,9 @@ def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
         dataframe (pd.DataFrame): sliced pd DataFrame.
 
     """
+
+    dataframe = dataframe.sort_index()
+
     if timestamp_start is None:
         print("start index was not provided")
         timestamp_start = dataframe.first_valid_index()
@@ -554,8 +608,8 @@ def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
         print("end index is not provided")
         timestamp_end = dataframe.last_valid_index()
 
-    dataframe = dataframe.sort_index()
-    print(timestamp_start, timestamp_end)
+
+
     reduced_dataframe = dataframe[(dataframe.index > timestamp_start) & (dataframe.index < timestamp_end)]
 
     return reduced_dataframe
@@ -664,7 +718,7 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
     Returns:
         dataframe: a refilled dataframe that may still contain NaN due to impossible refills.
     """
-    delta_time_tmp = dataframe.index[0] - dataframe.index[1]
+
     # check which rows contain NaNs
     if dataframe.isnull().any().any():
         print("NaN's detected proceed with data refill")
@@ -685,10 +739,12 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
                                index=indices.index)
 
         # remove Rows that don't match the threshold
+        # timestep between samples in unit of timestamps
+        delta_time_tmp = dataframe.index[0] - dataframe.index[1]
+
         # threshold describes the number of samples that make a block of missing data
-        # this needs to be converted to seconds
-        pd.to_timedelta(delta_time_tmp, 's')
-        threshold_sec = pd.to_timedelta(threshold * delta_time_tmp)
+        # (needs to consider the spacing between data)
+        threshold_sec = threshold * delta_time_tmp
         indices = indices[indices['out-3'] >= threshold_sec]
 
         # list with indices that need replacement
@@ -697,14 +753,14 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
 
         # find suitable replacement data
         for block in indices_list:
-            benchmark = block[2].seconds / delta_time_tmp.seconds
+            benchmark = block[2] / delta_time_tmp
             attempt = 0
             #check for future data to refill
             if forward_fill:
                 for iter in range(1, attempts):
                     timediff = pd.Timedelta(days, unit='D')
-                    start = block[0] + (timediff*iter)
-                    end = block[1] + (timediff*iter)
+                    start = int(mktime((datetime.fromtimestamp(block[0]) + (timediff*iter)).timetuple()))
+                    end = int(mktime((datetime.fromtimestamp(block[1]) + (timediff*iter)).timetuple()))
                     replacement_block = time_filter_data(dataframe, start, end)
                     if not replacement_block.empty:
                         num_of_nan = replacement_block.isnull().sum().sum()
@@ -715,8 +771,9 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
             if backward_fill:
                 for iter in range(1, attempts):
                     timediff = pd.Timedelta(days, unit='D')
-                    start = block[0] - (timediff*iter)
-                    end = block[1] - (timediff*iter)
+                    start = int(mktime((datetime.fromtimestamp(block[0]) - (timediff * iter)).timetuple()))
+                    end = int(mktime((datetime.fromtimestamp(block[1]) - (timediff * iter)).timetuple()))
+
                     replacement_block = time_filter_data(dataframe, start, end)
                     if not replacement_block.empty:
                         num_of_nan = replacement_block.isnull().sum().sum()
@@ -742,18 +799,21 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
 def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
                      resampling_unit: str = "min", timestamp_start: int = None,
                      timestamp_end: int = None) -> pd.DataFrame:
-    """ forces a full index. Missing index will be replaced by Nan
+    """ forces a full index. Missing index will be replaced by Nan.
+
+        Note: resampling should be done before to benefit from sampling strategies.
 
         Args:
             dataframe(dataframe): data frame containing NaN values
             resampling_step (int, 8): This is the desired time step of final dataframe.
-            resampling_unit (str, 'min'): unit of desired time step
-            timestamp_start (int, none): index at which the dataframe starts
-            timestamp_end (int, none): index at which the dataframe ends
+            resampling_unit (str, 'M'): unit of desired time step
+            timestamp_start (string, none): index at which the dataframe starts
+            timestamp_end (string, none): index at which the dataframe ends
         Returns
             dataframe(pandas.Dataframe): dataframe with full index
     """
 
+    print("index dataframe", type(dataframe.index))
     if timestamp_start is None:
         print("start index was not provided")
         timestamp_start = dataframe.first_valid_index()
@@ -763,20 +823,9 @@ def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
         timestamp_end = dataframe.last_valid_index()
 
     freq = str(resampling_step) + resampling_unit
-    print(freq, type(timestamp_start), type(timestamp_end))
-    range = pd.date_range(timestamp_start, timestamp_end, freq=freq)
-    temp_df = pd.DataFrame({'Date': range})
-    temp_df.set_index("Date")
 
-    print("new dataframe:", temp_df)
+    range = pd.DataFrame({"Date":pd.date_range(start=timestamp_start, end=timestamp_end, freq=freq)})
+    range["timestamp"] = (range["Date"] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
+    delta_time_tmp = dataframe.reindex(range["timestamp"])
 
-    delta_time_tmp = pd.concat(temp_df, dataframe)
-    print("concatenate:", delta_time_tmp)
-
-    delta_time_tmp = pd.to_timedelta(delta_time_tmp, 's')
-
-    dataframe['ts'] = pd.to_datetime(dataframe.index, unit='s')
-    dataframe = dataframe.set_index('ts')
-    dataframe = dataframe.resample(delta_time_tmp).asfreq()
-
-    return dataframe
+    return delta_time_tmp
