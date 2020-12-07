@@ -347,7 +347,7 @@ class ConfigFileParser:
         energy_storage_dict = dict(self.config.items("EnergyStorage")) \
             if "EnergyStorage" in self.config else {}
 
-        energy_storage_dict["node_id"] = self.config["EnergyStorage"].getint("node_id")
+        # energy_storage_dict["node_id"] = self.config["EnergyStorage"].getint("node_id")
         energy_storage_dict["max_capacity"] = self.config["EnergyStorage"].getfloat("max_capacity")
         energy_storage_dict["depth_of_discharge_limit"] = self.config["EnergyStorage"].getfloat("depth_of_discharge_limit")
         energy_storage_dict["charging_power_limit"] = self.config["EnergyStorage"].getfloat("charging_power_limit")
@@ -388,13 +388,13 @@ class ConfigFileParser:
         tariff_Factors_dict = dict(self.config.items("TariffFactors")) \
             if "TariffFactors" in self.config else {}
 
-        tariff_Factors_dict["lt_i_factor"] = self.config["TariffFactors"].getfloat("lt_i_factor")
-        tariff_Factors_dict["lt_e_factor"] = self.config["TariffFactors"].getfloat("lt_e_factor")
-        tariff_Factors_dict["rt_e_factor"] = self.config["TariffFactors"].getfloat("rt_e_factor")
-        tariff_Factors_dict["rt_i_factor"] = self.config["TariffFactors"].getfloat("rt_i_factor")
+        tariff_Factors_dict["lt_import_factor"] = self.config["TariffFactors"].getfloat("lt_import_factor")
+        tariff_Factors_dict["lt_export_factor"] = self.config["TariffFactors"].getfloat("lt_export_factor")
+        tariff_Factors_dict["rt_export_factor"] = self.config["TariffFactors"].getfloat("rt_export_factor")
+        tariff_Factors_dict["rt_import_factor"] = self.config["TariffFactors"].getfloat("rt_import_factor")
         tariff_Factors_dict["subscription_fee"] = self.config["TariffFactors"].getfloat("subscription_fee")
 
-        print("traiff factors: ", tariff_Factors_dict)
+        print("tariff factors: ", tariff_Factors_dict)
         return tariff_Factors_dict
 
     def read_scenario_info(self) ->dict:
