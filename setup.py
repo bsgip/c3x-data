@@ -18,7 +18,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url=None,
-    packages=setuptools.find_packages(),
+    packages=['c3x.data_cleaning', 'c3x.data_loaders', 'c3x.data_statistics'],
     classifiers=[
     ],
     install_requires=install_requires,
