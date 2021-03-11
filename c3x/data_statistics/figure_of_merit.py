@@ -32,12 +32,13 @@ def meter_power(meas_dict: dict, meter: int, axis: int = 0, column: int = 0) -> 
     if meas_dict[meter]:
         meter_p = pd.DataFrame()
         for meas in meas_dict[meter]:
-            if 'loads' in meas:
+            if 'load' in meas:
                 meter_p = pd.concat([meter_p, meas_dict[meter][meas].iloc[:,column]], axis=axis)
             elif 'solar' in meas:
                 meter_p = pd.concat([meter_p, meas_dict[meter][meas].iloc[:,column]], axis=axis)
             elif 'batteries' in meas:
                 meter_p = pd.concat([meter_p, meas_dict[meter][meas].iloc[:,column]], axis=axis)
+
     meter_p = meter_p.sum(axis=1)
     return meter_p
 
