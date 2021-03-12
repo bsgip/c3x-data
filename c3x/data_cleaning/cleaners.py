@@ -22,28 +22,25 @@ def duplicates_remove(dataframe: pd.DataFrame,
     Data replacement describes how  an error should be handled. None will remove all
     duplicate timestamps without refilling. One of the following data replacements methods
     must be used:
-        first : removes duplicates except for the first occurrence.
-        last : removes duplicates except for the last occurrence.
-        average: not implemented yet
-        max:  not implemented yet
-        remove: Removes the date to users specifications
-        none : no duplicate is kept.
+    - first : removes duplicates except for the first occurrence.
+    - last : removes duplicates except for the last occurrence.
+    - average: not implemented yet
+    - max:  not implemented yet
+    - remove: Removes the date to users specifications
+    - none : no duplicate is kept.
 
     It may be of  interest to remove more data then the actual faulty data point. A hole day
     (by date) the hole data_set or some hours. One of the following removal_time_frames must
     be chosen:
-        day: 24 h of data will be removed
-        hour: 1h of data will be removed
-        all: all data will be removed
+    - day: 24 h of data will be removed
+    - hour: 1h of data will be removed
+    - all: all data will be removed
 
     The time range determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: fault is places at the beginning of the data that is removed (eg. 1h after the fault
-            is removed)
-        middle: fault is places in the middle of the data that is removed (eg. 30 min before and
-            after the fault is removed)
-        end: fault is places at the end of the data that is removed (eg. 1h before the fault is
-            removed)
+    - start: fault is places at the beginning of the data that is removed (eg. 1h after the fault is removed)
+    - middle: fault is places in the middle of the data that is removed (eg. 30 min before and after the fault is removed)
+    - end: fault is places at the end of the data that is removed (eg. 1h before the fault is removed)
 
     Args:
         dataframe (pd.DataFrame): Dataframe with data to be checked for duplicates
@@ -131,30 +128,27 @@ def handle_nans(dataframe: pd.DataFrame, data_replacement: str = 'none',
     Data replacement describes how  an error should be handled. None will remove all
     duplicate timestamps without refilling. One of the following data replacements methods
     must be used:
-        drop: NANs are dropped.
-        zero: Fills all NANs with 0 (value).
-        first: Uses the previous non - NAN occurrence.
-        last: Uses the next non - NAN occurrence.
-        none: Nothing is changed.
-        average: not implemented yet
-        max: not implemented yet
-        remove: Removes the date to users specifications.
+    - drop: NANs are dropped.
+    - zero: Fills all NANs with 0 (value).
+    - first: Uses the previous non - NAN occurrence.
+    - last: Uses the next non - NAN occurrence.
+    - none: Nothing is changed.
+    - average: not implemented yet
+    - max: not implemented yet
+    - remove: Removes the date to users specifications.
 
     It may be of  interest to remove more data then the actual faulty data point. A hole day
     (by date) the hole data_set or some hours. One of the following removal_time_frames must
     be chosen:
-        day: 24 hours of data will be removed.
-        hour: 1 hour of data will be removed.
-        all: All data will be removed.
+    - day: 24 hours of data will be removed.
+    - hour: 1 hour of data will be removed.
+    - all: All data will be removed.
 
     The timerange determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: Fault is placed at the beginning of the data that is removed (eg. 1 hour after the
-            fault is removed).
-        middle: Fault is placed in the middle of the data that is removed (eg. 30 min before and
-            after the fault is removed).
-        end: Fault is placed at the end of the data that is removed (eg. 1 hour before the fault is
-            removed).
+    - start: Fault is placed at the beginning of the data that is removed (eg. 1 hour after the fault is removed).
+    - middle: Fault is placed in the middle of the data that is removed (eg. 30 min before and after the fault is removed).
+    - end: Fault is placed at the end of the data that is removed (eg. 1 hour before the fault is removed).
 
     Args:
         dataframe (pd.DataFrame): Dataframe with data to be fixed.
@@ -225,27 +219,24 @@ def remove_negative_values(dataframe: pd.DataFrame, data_replacement: str = 'non
     Data replacement describes how  an error should be handled. None will remove all
     duplicate timestamps without refilling. One of the following data replacements methods
     must be used:
-        drop: NANs are dropped.
-        zero: Fills all NANs with 0 (value).
-        nan: Fills negative values with NaN's.
-        none: Nothing is changed.
-        remove: Removes the date to users specifications.
+    - drop: NANs are dropped.
+    - zero: Fills all NANs with 0 (value).
+    - nan: Fills negative values with NaN's.
+    - none: Nothing is changed.
+    - remove: Removes the date to users specifications.
 
-     It may be of  interest to remove more data then the actual faulty data point. A hole day
+    It may be of  interest to remove more data then the actual faulty data point. A hole day
     (by date) the hole data_set or some hours. One of the following removal_time_frames must
     be chosen:
-        day: 24 hours of data will be removed.
-        hour: 1 hour of data will be removed.
-        all: All data will be removed.
+    - day: 24 hours of data will be removed.
+    - hour: 1 hour of data will be removed.
+    - all: All data will be removed.
 
     The time range determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: Fault is places at the beginning of the data that is removed (eg. 1 hour after the
-            fault is removed)
-        middle: Fault is places in the middle of the data that is removed (eg. 30 minutes before and
-            after the fault is removed)
-        end: Fault is places at the end of the data that is removed (eg. 1 hour before the fault is
-            removed)
+    - start: Fault is places at the beginning of the data that is removed (eg. 1 hour after the fault is removed)
+    - middle: Fault is places in the middle of the data that is removed (eg. 30 minutes before and after the fault is removed)
+    - end: Fault is places at the end of the data that is removed (eg. 1 hour before the fault is removed)
 
     Args:
         dataframe (pd.dataframe): Dataframe with data to be fixed
@@ -314,27 +305,24 @@ def remove_positive_values(dataframe: pd.DataFrame, data_replacement: str = 'non
 
     Data replacement describes how an error should be handled.
     One of the following data replacements methods must be used:
-        drop: NANs are dropped.
-        zero: Fills all NANs with 0 (value).
-        nan: Fills negative values with NaN's.
-        none: Nothing is changed.
-        remove: Removes the date to users specifications.
+    - drop: NANs are dropped.
+    - zero: Fills all NANs with 0 (value).
+    - nan: Fills negative values with NaN's.
+    - none: Nothing is changed.
+    - remove: Removes the date to users specifications.
 
     It may be of  interest to remove more data then the actual faulty data point. A hole day
     (by date) the hole data_set or some hours. One of the following removal_time_frames must
     be chosen:
-        day: 24 hour of data will be removed.
-        hour: 1 hour of data will be removed.
-        all: All data will be removed.
+    - day: 24 hour of data will be removed.
+    - hour: 1 hour of data will be removed.
+    - all: All data will be removed.
 
     The time range determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: Fault is places at the beginning of the data that is removed (eg. 1 hour after the
-            fault is removed)
-        middle: Fault is places in the middle of the data that is removed (eg. 30 minutes before and
-            after the fault is removed)
-        end: Fault is places at the end of the data that is removed (eg. 1 hour before the fault is
-            removed)
+    - start: Fault is places at the beginning of the data that is removed (eg. 1 hour after the fault is removed)
+    - middle: Fault is places in the middle of the data that is removed (eg. 30 minutes before and after the fault is removed)
+    - end: Fault is places at the end of the data that is removed (eg. 1 hour before the fault is removed)
 
     Args:
         dataframe (pd.dataframe): Dataframe with data to be fixed.
@@ -400,12 +388,9 @@ def find_time_range_method_hour(timestamp: int, fault_placement: str = "end") ->
 
     The timerange determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after
-            the fault is removed).
-        middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before
-            and after the fault is removed).
-        end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault
-            is removed).
+    - start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after the fault is removed).
+    - middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before and after the fault is removed).
+    - end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault is removed).
 
     Args:
         timestamp (int): timestamp in unixtime around which data needs to be removed
@@ -461,12 +446,9 @@ def find_time_range_method_day(timestamp: tuple, fault_placement: str = 'start')
 
     The timerange determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after
-            the fault is removed).
-        middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before
-            and after the fault is removed).
-        end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault
-            is removed).
+    - start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after the fault is removed).
+    - middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before and after the fault is removed).
+    - end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault is removed).
 
     Args:
         timestamp (int): Timestamp in unix time around which data needs to be removed.
@@ -523,12 +505,9 @@ def find_time_range_method_calendarday(timestamp: tuple):
 
     The timerange determine the position of the data point in the middle, at the end or at the
     start of the data. One of the following fault placements are possible:
-        start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after
-            the fault is removed).
-        middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before
-            and after the fault is removed).
-        end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault
-            is removed).
+    - start: The fault is placed at the beginning of the data that is removed (eg. 1 hour after the fault is removed).
+    - middle: The fault is placed in the middle of the data that is removed (eg. 30 minutes before and after the fault is removed).
+    - end: The fault is placed at the end of the data that is removed (eg. 1 hour before the fault is removed).
 
     Args:
         timestamp (int): Timestamp in unix time around which data needs to be removed.
@@ -624,15 +603,15 @@ def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_un
     In special circumstance it my be useful to fill the missing data with NaN(nan)
 
     The following describes the parameters in more detail:
-        resampling_step: This is the desired time step of final dataframe.
-        resampling_unit: The unit of desired time step. Possible units are:
-            h 	hour 	+/- 1.0e15 years 	[1.0e15 BC, 1.0e15 AD]
-            m 	minute 	+/- 1.7e13 years 	[1.7e13 BC, 1.7e13 AD]
-            s 	second 	+/- 2.9e12 years 	[ 2.9e9 BC, 2.9e9 AD]
+    - resampling_step: This is the desired time step of final dataframe.
+    - resampling_unit: The unit of desired time step. Possible units are:
+    - h 	hour 	+/- 1.0e15 years 	[1.0e15 BC, 1.0e15 AD]
+    - m 	minute 	+/- 1.7e13 years 	[1.7e13 BC, 1.7e13 AD]
+    - s 	second 	+/- 2.9e12 years 	[ 2.9e9 BC, 2.9e9 AD]
 
     One of the following upsampling strategies are possible
-        first: The value before the newly inserted value is chosen (ffill).
-        last: The next value after the newly inserted value is chosen.
+    - first: The value before the newly inserted value is chosen (ffill).
+    - last: The next value after the newly inserted value is chosen.
 
     Args:
         dataframe (pd.DataFrame): The dataframe to be resampled.

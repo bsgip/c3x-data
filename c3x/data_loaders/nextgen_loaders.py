@@ -1,4 +1,4 @@
-"""loaders.py contains a class of functions that loads a next gen data set, returning the data in a
+"""Next Gen Loaders contains a class of functions that loads a next gen data set, returning the data in a
 consistent, well structured format.
 
 Data is read as it is and is not cleaned in anyway in this class (if cleaning is required see

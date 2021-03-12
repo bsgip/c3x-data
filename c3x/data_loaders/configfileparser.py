@@ -1,4 +1,4 @@
-""" Module to parse a config file and convert read sections to dictionaries of Keys:Values """
+""" Config File Parser Module helps to parse a config file and convert read sections to dictionaries of Keys:Values """
 
 import configparser
 import datetime
@@ -6,8 +6,8 @@ import datetime
 
 class ConfigFileParser:
     """The module reads a config file. Values to be read are group in sections Batches, Data Path,
-    Data Usage, Time Filter, Sign Correction, Duplicate Removal, Nan handling and Resample. Each of
-    these section can be read separately and the used as parameters for various functions
+    Data Usage, Time Filter, Sign Correction, Duplicate Removal, Nan handling and Resample and so on.
+    Each of these section can be read separately and the used as parameters for various functions
 
     """
 
@@ -100,10 +100,10 @@ class ConfigFileParser:
         that is typecasted.
 
         Variables read into the dictionary (key:value):
-            wrong_sign_removal: True/False
-            data_replacement: drop/nan/zero/day/hour/all.
-            removal_time_frame: day/hour/all
-            fault_placement:start/middle/end/calendar
+        - wrong_sign_removal: True/False
+        - data_replacement: drop/nan/zero/day/hour/all.
+        - removal_time_frame: day/hour/all
+        - fault_placement:start/middle/end/calendar
 
         Returns:
             sign_correction_dict (dict): dictionary with configuration values for sign correction
@@ -123,10 +123,10 @@ class ConfigFileParser:
         is type casted.
 
         Variables read into the dictionary:
-            duplicate_removal:True/False
-            data_replacement:first/last/none/average/max/remove
-            removal_time_frame:day/hour/all
-            fault_placement:start/middle/end/calendar
+        - duplicate_removal:True/False
+        - data_replacement:first/last/none/average/max/remove
+        - removal_time_frame:day/hour/all
+        - fault_placement:start/middle/end/calendar
 
         Returns:
             duplicate_removal_dict (dict): dictionary with configuration values for
@@ -147,10 +147,10 @@ class ConfigFileParser:
         typecasted.
 
         Variables read into the dictionary:
-            nan_removal:True/False
-            data_replacement:drop/zero/first/last/none/average/max/remove
-            removal_time_frame:day/hour/all
-            fault_placement:start/middle/end/calendar
+        - nan_removal:True/False
+        - data_replacement:drop/zero/first/last/none/average/max/remove
+        - removal_time_frame:day/hour/all
+        - fault_placement:start/middle/end/calendar
 
         Returns:
             nan_handling_dict (dict): dictionary with configuration values for nan handling
@@ -170,10 +170,10 @@ class ConfigFileParser:
         types that should be used.
 
         Values read contain:
-            batteries = True/False
-            solar = True/False
-            node = True/False
-            loads = True/False
+        - batteries = True/False
+        - solar = True/False
+        - node = True/False
+        - loads = True/False
 
         Returns:
             measurement_types_list (list): a list with measurement types to be used
@@ -201,17 +201,17 @@ class ConfigFileParser:
 
         The user my choose to resample the index. If so he can choose a time step to which the data
         is resampled.The time step can have a unit possible units are :
-            h 	hour 	+/- 1.0e15 years 	[1.0e15 BC, 1.0e15 AD]
-            m 	minute 	+/- 1.7e13 years 	[1.7e13 BC, 1.7e13 AD]
-            s 	second 	+/- 2.9e12 years 	[ 2.9e9 BC, 2.9e9 AD]
+        - h 	hour 	+/- 1.0e15 years 	[1.0e15 BC, 1.0e15 AD]
+        - m 	minute 	+/- 1.7e13 years 	[1.7e13 BC, 1.7e13 AD]
+        - s 	second 	+/- 2.9e12 years 	[ 2.9e9 BC, 2.9e9 AD]
 
         the user may choose how he would like to handle fills in upsampled data
 
         Variables read into the dictionary:
-            resampeling = True
-            resampeling_step = 8
-            resampeling_unit = m
-            resampeling_strategie_upsampeling = first/last
+        - resampeling = True
+        - resampeling_step = 8
+        - resampeling_unit = m
+        - resampeling_strategie_upsampeling = first/last
         """
         resampling_dict = dict(self.config.items("Resample")) if "Resample" in self.config else {}
 
@@ -231,12 +231,12 @@ class ConfigFileParser:
         typecasted.
 
         Variables read into the dictionary:
-            data_refill(bool) :True/False
-            days (int) : 7
-            attempts: 7
-            threshold: 5
-            forward_fill = True
-            backward_fill = True
+        - data_refill(bool) :True/False
+        - days (int) : 7
+        - attempts: 7
+        - threshold: 5
+        - forward_fill = True
+        - backward_fill = True
 
         Returns:
             refill_dict (dict): dictionary with configuration values for refilling data
@@ -280,40 +280,25 @@ class ConfigFileParser:
         """
         optimiser_objectives_dict = dict(self.config.items("Optimiser Objectives"))\
             if "Optimiser Objectives" in self.config else {}
-        optimiser_objectives_list = []
 
         if optimiser_objectives_dict:
-            if self.config["Optimiser Objectives"].getboolean("ConnectionPointCost", fallback=False):
-                optimiser_objectives_list.append("ConnectionPointCost")
-            if self.config["Optimiser Objectives"].getboolean("ConnectionPointEnergy", fallback=False):
-                optimiser_objectives_list.append("ConnectionPointEnergy")
-            if self.config["Optimiser Objectives"].getboolean("ThroughputCost", fallback=False):
-                optimiser_objectives_list.append("ThroughputCost")
-            if self.config["Optimiser Objectives"].getboolean("Throughput", fallback=False):
-                optimiser_objectives_list.append("Throughput")
-            if self.config["Optimiser Objectives"].getboolean("GreedyGenerationCharging", fallback=False):
-                optimiser_objectives_list.append("GreedyGenerationCharging")
-            if self.config["Optimiser Objectives"].getboolean("GreedyDemandDischarging", fallback=False):
-                optimiser_objectives_list.append("GreedyDemandDischarging")
-            if self.config["Optimiser Objectives"].getboolean("EqualStorageActions", fallback=False):
-                optimiser_objectives_list.append("EqualStorageActions")
-            if self.config["Optimiser Objectives"].getboolean("ConnectionPointPeakPower", fallback=False):
-                optimiser_objectives_list.append("ConnectionPointPeakPower")
-            if self.config["Optimiser Objectives"].getboolean("ConnectionPointQuantisedPeak", fallback=False):
-                optimiser_objectives_list.append("ConnectionPointQuantisedPeak")
-            if self.config["Optimiser Objectives"].getboolean("PiecewiseLinear", fallback=False):
-                optimiser_objectives_list.append("PiecewiseLinear")
-            if self.config["Optimiser Objectives"].getboolean("LocalModelsCost", fallback=False):
-                optimiser_objectives_list.append("LocalModelsCost")
-            if self.config["Optimiser Objectives"].getboolean("LocalGridMinimiser", fallback=False):
-                optimiser_objectives_list.append("LocalGridMinimiser")
-            if self.config["Optimiser Objectives"].getboolean("LocalThirdParty", fallback=False):
-                optimiser_objectives_list.append("LocalThirdParty")
-            if self.config["Optimiser Objectives"].getboolean("LocalGridPeakPower", fallback=False):
-                optimiser_objectives_list.append("LocalGridPeakPower")
+            optimiser_objectives_dict["ConnectionPointCost"] = self.config["Optimiser Objectives"].getboolean("ConnectionPointCost", fallback=False)
+            optimiser_objectives_dict["ConnectionPointEnergy"] = self.config["Optimiser Objectives"].getboolean("ConnectionPointEnergy", fallback=False)
+            optimiser_objectives_dict["ThroughputCost"] = self.config["Optimiser Objectives"].getboolean("ThroughputCost", fallback=False)
+            optimiser_objectives_dict["Throughput"] = self.config["Optimiser Objectives"].getboolean("Throughput", fallback=False)
+            optimiser_objectives_dict["GreedyGenerationCharging"] = self.config["Optimiser Objectives"].getboolean("GreedyGenerationCharging", fallback=False)
+            optimiser_objectives_dict["GreedyDemandDischarging"] = self.config["Optimiser Objectives"].getboolean("GreedyDemandDischarging", fallback=False)
+            optimiser_objectives_dict["EqualStorageActions"] = self.config["Optimiser Objectives"].getboolean("EqualStorageActions", fallback=False)
+            optimiser_objectives_dict["ConnectionPointPeakPower"] = self.config["Optimiser Objectives"].getboolean("ConnectionPointPeakPower", fallback=False)
+            optimiser_objectives_dict["ConnectionPointQuantisedPeak"] = self.config["Optimiser Objectives"].getboolean("ConnectionPointQuantisedPeak", fallback=False)
+            optimiser_objectives_dict["PiecewiseLinear"] = self.config["Optimiser Objectives"].getboolean("PiecewiseLinear", fallback=False)
+            optimiser_objectives_dict["LocalModelsCost"] = self.config["Optimiser Objectives"].getboolean("LocalModelsCost", fallback=False)
+            optimiser_objectives_dict["LocalGridMinimiser"] = self.config["Optimiser Objectives"].getboolean("LocalGridMinimiser", fallback=False)
+            optimiser_objectives_dict["LocalThirdParty"] = self.config["Optimiser Objectives"].getboolean("LocalThirdParty", fallback=False)
+            optimiser_objectives_dict["LocalGridPeakPower"] = self.config["Optimiser Objectives"].getboolean("LocalGridPeakPower", fallback=False)
 
-        print("Objectives: ", optimiser_objectives_list)
-        return optimiser_objectives_list
+        print("Objectives: ", optimiser_objectives_dict)
+        return optimiser_objectives_dict
 
     def read_inverter(self) -> dict:
         """ Reads the inverters from config file.

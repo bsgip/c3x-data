@@ -1,17 +1,19 @@
-"""Financial calculations for energy.
+"""figures of merit is a collection of financial calculations for energy.
 
     This module contains financial calculations based on solar power and batteries
     in a given network. The networks used are defined as network objects (see evolve parsers).
 
-    Todo:
-        * Add inverters: Inverters are not considered at the moment
-        * Improve Nan Handeling
+    TODO: Add inverters: Inverters are not considered at the moment and Improve Nan Handeling
+
 """
 
 import numpy
 import pandas as pd
 from c3x.data_cleaning import unit_conversion
 
+#Todo:
+#Add inverters: Inverters are not considered at the moment
+#Improve Nan Handeling
 
 def meter_power(meas_dict: dict, meter: int, axis: int = 0, column: int = 0) -> pd.Series:
     """
