@@ -47,6 +47,56 @@ class Rate:
         self.rate = rate
 
 
+def load_nem_prices_from_DB(table_name, database_name, start_time=None, end_time=None, region="NSW1"):
+    """
+        loads NEM prices for given interval and region from a database
+
+        Note: The values in the database may be arranged in 5 minute intervals, due to the bidding
+        processes in the energy market. You may find that you need to adjust your the start_time
+        and end_time accordingly (see tests/tariff_database/nemweb_TRADINGPRICES.db)
+
+        Args:
+            table_name (str): Name of the nem-table
+            database_name (str): Name of the database
+            start_time  (datetime.datetime): desired starting time.
+            end_time  (datetime.datetime): desired end time.
+            region (str) : region for which trading prices are requested
+        """
+
+    # query the right amount of data instead of reading the hol think
+    statement = "select * from " + table_name + " where REGIONID == " + "'" + region+"'"
+
+    # Open database to read data data in
+    database = sqlalchemy.create_engine('sqlite:///' + database_name)
+    conn = database.connect()
+    trading_price = pd.read_sql_query(statement, conn)
+    trading_price = trading_price.set_index('time')
+    conn.close()
+    database.dispose()
+
+    start_timestamp = start_time.timestamp()
+    end_timestamp = end_time.timestamp()
+
+    trading_price = trading_price.truncate(before=start_timestamp, after=end_timestamp)
+    trading_price.index = pd.to_datetime(trading_price.index, unit='s')
+    trading_price = trading_price.tz_localize('GMT').tz_convert('Australia/Sydney')
+
+    # convert from MWh to kWh
+    trading_price = trading_price[['RRP',
+                                   'RAISE6SECRRP',
+                                   'RAISE60SECRRP',
+                                   'RAISE5MINRRP',
+                                   'LOWER6SECRRP',
+                                   'LOWER60SECRRP',
+                                   'LOWER5MINRRP']] / 1000
+
+    trading_price = trading_price.rename(columns={"RRP": "NEM_RRP"})
+    # convert to $/kW/5min
+    trading_price = trading_price.resample('5min').ffill()  # / 12
+
+    return trading_price[:-1]
+
+
 def datetime_tariff_map(datetime: pd.DatetimeIndex, month_day_hour_array):
     """
     A tariff is valid during a certain time range. The data to determine validity may be stored as
