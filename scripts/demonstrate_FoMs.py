@@ -82,7 +82,7 @@ solar_result = figure_of_merit.solar_kwh_per_kw(cleaned_data, node_info)
 print("Average solar performance ", numpy.round(solar_result["average"], decimals=2), 'kWh/kW')
 
 # Tariffs are in $ / kwh
-data_location = '../../tariffs/tariff_database/'
+data_location = '../tests/tariff_database/'
 local_tz = 'Australia/Sydney'
 
 tariff_dict = {}

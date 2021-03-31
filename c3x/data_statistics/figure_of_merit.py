@@ -60,8 +60,8 @@ def financial(meter_p: pd.Series, import_tariff: pd.Series, export_tariff: pd.Se
     timestep = numpy.timedelta64(meter_p.index[1] - meter_p.index[0])
     meter = unit_conversion.convert_watt_to_watt_hour(meter_p, timedelta=timestep)
 
-    import_power_cost = numpy.sum(meter >= 0)
-    export_power_revenue = numpy.sum(meter < 0)
+    import_power_cost = meter.where(meter>=0).fillna(value=0.0)
+    export_power_revenue = meter.where(meter<0).fillna(value=0.0)
 
     cost = import_power_cost * import_tariff + export_power_revenue*export_tariff
 
@@ -89,7 +89,6 @@ def customer_financial(meas_dict: dict, node_keys: list = None, tariff: dict = N
     average = []
 
     nodes = node_keys if node_keys else meas_dict.keys()
-
     for key in nodes:
         if type(key) == int:
             key = key.tostr()
