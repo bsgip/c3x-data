@@ -6,6 +6,7 @@
 """
 import os
 import pandas
+import pickle
 from time import mktime
 
 # BSGIP specific tools
@@ -19,7 +20,7 @@ config = configfileparser.ConfigFileParser("config/example_for_cleaning.ini")
 
 data_paths = config.read_data_path()
 batch_info = config.read_batches()
-measurement_types = config.read_data_usage()
+data_usage = config.read_data_usage()
 
 # Create a nextGen data object that has working paths and can be sliced using batches
 next_gen = nextgen_loaders.NextGenData(data_name='NextGen',
@@ -35,7 +36,7 @@ next_gen = nextgen_loaders.NextGenData(data_name='NextGen',
                                        concat_batches_end=batch_info["concat_batches_end"])
 
 # concatenates batches of one data type to one file per node (data frames and separate network)
-for data_type in measurement_types:
+for data_type in data_usage:
     next_gen.concat_data(meas_type=data_type,
                          concat_batches_start=batch_info["concat_batches_start"],
                          concat_batches_end=batch_info["concat_batches_end"])
@@ -46,15 +47,15 @@ for data_type in measurement_types:
 time = config.read_time_filters()
 signs = config.read_sign_correction()
 duplicates = config.read_duplicate_removal()
-data_usage = config.read_data_usage()
 nan_handling = config.read_nan_handeling()
 resampling = config.read_resampling()
+measurement_types = config.read_measurement_types()
 
 # generate a file list that needs cleaning (only node data is considered e.G. concatenated data)
 data_path_list = []
 data_files = []
 
-for data_type in measurement_types:
+for data_type in data_usage:
     path = data_paths[data_type]
     for file in os.listdir(data_paths[data_type]):
         data_files.append(os.path.join(path, file))
@@ -85,11 +86,14 @@ for file in data_files:
 
         if "load" in file and signs["wrong_sign_removal"] and not node_data.empty:
             print("remove wrong signs from load data")
+
             node_data = cleaners.remove_negative_values(node_data,
                                                         signs["data_replacement"],
                                                         signs["removal_time_frame"],
                                                         signs["fault_placement"],
-                                                        coloumn_index = 1)
+                                                        coloumn_index=0)
+
+
         if nan_handling["nan_removal"] and not node_data.empty:
             print("remove nans from time frame")
             node_data = cleaners.handle_nans(node_data,
@@ -104,20 +108,30 @@ for file in data_files:
                                           resampling_unit=resampling["resampling_unit"],
                                           resampling_strategy_upsampling=resampling["resampling_strategy_upsampling"])
 
+        print("forcing full index")
+        node_data = cleaners.force_full_index(node_data,
+                                            resampling_step=resampling["resampling_step"],
+                                            resampling_unit=resampling["resampling_unit"],
+                                            timestamp_start=time["start_time"],
+                                            timestamp_end=time["end_time"])
+
         if not node_data.empty:
             path = file.split("/")
             filename = path[len(path)-1].split(".")[0]
             result_location = data_paths["results"] + "/" + filename
-            node_data.to_pickle(result_location + '.npy')
+            with open(result_location + '.npy', 'wb') as handle:
+                pickle.dump(node_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
             node_data.to_csv(path_or_buf=(result_location + ".csv"), index=True)
         else:
             print("dataframe is now empty, file removed ", file)
             os.remove(file)
 
-cleaned_data = next_gen.to_measurement_data()
+cleaned_data = next_gen.read_clean_data(measurement_types["loads"], measurement_types["solar"], measurement_types["batteries"])
 
 print("number of properties with data between ", time["start_time"], "and", time["end_time"], "is",
       len(cleaned_data.keys()))
+
+print(cleaned_data)
 
 
 
