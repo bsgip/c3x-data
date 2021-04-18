@@ -14,10 +14,10 @@ from c3x.data_loaders import configfileparser, nextgen_loaders, tariff_loaders
 from c3x.data_cleaning import cleaners
 from c3x.data_statistics import figure_of_merit
 
-
 config = configfileparser.ConfigFileParser("config/example_for_FoMs.ini")
 
 measurement_types = config.read_data_usage()
+data_usage = config.read_measurement_types()
 data_paths = config.read_data_path()
 data_files = []
 
@@ -26,8 +26,9 @@ next_gen = nextgen_loaders.NextGenData('FoM', source=data_paths['source'],
                                        batteries=data_paths["batteries"],
                                        solar=data_paths["solar"],
                                        loads=data_paths["loads"],
-                                       node=data_paths["node"])
-cleaned_data = next_gen.to_measurement_data()
+                                       node=data_paths["node"],
+                                       results=data_paths["results"])
+cleaned_data = next_gen.read_clean_data(data_usage["loads"], data_usage["solar"], data_usage["batteries"])
 
 ##################### Figures of Merit #####################
 property_id = next(iter(cleaned_data))
@@ -39,9 +40,12 @@ load = phase["loads_"+str(property_id)]
 solar = phase["solar_" + str(property_id)]
 battery = phase["battery_" + str(property_id)]
 
-load_reduced = cleaners.time_filter_data(load, "2019-01-23 00:05","2019-01-23 13:00")
-solar_reduced = cleaners.time_filter_data(solar, "2019-01-23 00:05","2019-01-23 13:00")
-battery_reduced = cleaners.time_filter_data(battery, "2019-01-23 00:05","2019-01-23 13:00")
+start = pandas.to_datetime("2019-01-23 00:05")
+end = pandas.to_datetime("2019-01-23 12:00")
+
+load_reduced = cleaners.time_filter_data(load, start,end)
+solar_reduced = cleaners.time_filter_data(solar, start, end)
+battery_reduced = cleaners.time_filter_data(battery, start,end)
 
 plot_time = pandas.to_datetime(load_reduced.index, unit='s').tz_localize('GMT')
 plt.xticks(rotation=45, fontsize=4)
@@ -76,7 +80,7 @@ print('av_self_sufficiency_batteries', numpy.round(100*self_suf_con["av_self_suf
 print('av_self_consumption_solar', numpy.round(100*self_suf_con["av_self_consumption_solar"], decimals=2), '%')
 print('av_self_consumption_batteries', numpy.round(100*self_suf_con["av_self_consumption_batteries"], decimals=2), '%')
 
-node_info = pandas.read_pickle(data_paths["node"] + "/node_info.npy")
+node_info = pandas.read_pickle(data_paths["results"] + "/node_info.npy")
 solar_result = figure_of_merit.solar_kwh_per_kw(cleaned_data, node_info)
 
 print("Average solar performance ", numpy.round(solar_result["average"], decimals=2), 'kWh/kW')
@@ -102,9 +106,10 @@ for node in cleaned_data:
     tariff_dict[node] = tariff_info
 
 FoM_financial_raw = figure_of_merit.customer_financial(cleaned_data, node_keys=None, tariff=tariff_dict)
-print(FoM_financial_raw)
+
 print('------ Measured data ------')
-print("Average cost per connection point $", numpy.round(FoM_financial_raw["average"], decimals=2))
+##This feels more like the average cost of the hole system, not the connection point FIXME
+print("Average cost per connection point $", numpy.round(FoM_financial_raw["average"], decimals=5))
 print("Note this cost doesn't account for missing data")
 
 FoM_peak_powers = figure_of_merit.peak_powers(cleaned_data)  # , node_keys=['node_1'])
