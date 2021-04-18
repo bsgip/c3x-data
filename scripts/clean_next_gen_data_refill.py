@@ -7,6 +7,7 @@
 """
 import os
 import pandas
+import pickle
 from time import mktime
 
 # BSGIP specific tools
@@ -20,7 +21,7 @@ config = configfileparser.ConfigFileParser("config/example_for_refill.ini")
 
 data_paths = config.read_data_path()
 batch_info = config.read_batches()
-measurement_types = config.read_data_usage()
+data_usage = config.read_data_usage()
 
 # Create a nextGen data object that has working paths and can be sliced using batches
 next_gen = nextgen_loaders.NextGenData(data_name='NextGen',
@@ -36,7 +37,7 @@ next_gen = nextgen_loaders.NextGenData(data_name='NextGen',
                                        concat_batches_end=batch_info["concat_batches_end"])
 
 # concatenates batches of one data type to one file per node (data frames and separate network)
-for data_type in measurement_types:
+for data_type in data_usage:
     next_gen.concat_data(meas_type=data_type,
                          concat_batches_start=batch_info["concat_batches_start"],
                          concat_batches_end=batch_info["concat_batches_end"])
@@ -47,16 +48,15 @@ for data_type in measurement_types:
 time = config.read_time_filters()
 signs = config.read_sign_correction()
 duplicates = config.read_duplicate_removal()
-data_usage = config.read_data_usage()
 nan_handling = config.read_nan_handeling()
 resampling = config.read_resampling()
 refill = config.read_refill()
-
+measurement_types = config.read_measurement_types()
 # generate a file list that needs cleaning (only node data is considered e.G. concatenated data)
 data_path_list = []
 data_files = []
 
-for data_type in measurement_types:
+for data_type in data_usage:
     path = data_paths[data_type]
     for file in os.listdir(data_paths[data_type]):
         data_files.append(os.path.join(path, file))
@@ -91,7 +91,15 @@ for file in data_files:
                                                         signs["data_replacement"],
                                                         signs["removal_time_frame"],
                                                         signs["fault_placement"],
-                                                        coloumn_index=1)
+                                                        coloumn_index=0)
+
+        # this will remove NaNs from the data frame
+        if nan_handling["nan_removal"] and not node_data.empty:
+            print("remove nans from time frame")
+            node_data = cleaners.handle_nans(node_data,
+                                             nan_handling["data_replacement"],
+                                             nan_handling["removal_time_frame"],
+                                             nan_handling["fault_placement"])
 
         if resampling["resampling"] and not node_data.empty:
             print("resampling node data")
@@ -100,7 +108,10 @@ for file in data_files:
                                           resampling_unit=resampling["resampling_unit"],
                                           resampling_strategy_upsampling=resampling["resampling_strategy_upsampling"])
 
-        if refill["data_refill"] and not node_data.empty:
+
+        # to refill a full index is required. This will introduce NaN's again to the dataframe, which we will have to set to zero after refill
+        # if we remove the NaN we will end up having different length data frames for further analysis, this will not work.
+        if refill["data_refill"]:
             print("refilling data")
             node_data = cleaners.force_full_index(node_data,
                                                   resampling_step=resampling["resampling_step"],
@@ -114,23 +125,22 @@ for file in data_files:
                                              forward_fill=refill["forward_fill"],
                                              backward_fill=refill["backward_fill"])
 
-        if nan_handling["nan_removal"] and not node_data.empty:
-            print("remove nans from time frame")
-            node_data = cleaners.handle_nans(node_data,
-                                             nan_handling["data_replacement"],
-                                             nan_handling["removal_time_frame"],
-                                             nan_handling["fault_placement"])
+            if nan_handling["nan_removal"] and not node_data.empty:
+                print("set leftover nans to zero")
+                node_data = cleaners.handle_nans(node_data, "zero")
 
         if not node_data.empty:
             path = file.split("/")
             filename = path[len(path) - 1].split(".")[0]
             result_location = data_paths["results"] + "/" + filename
-            node_data.to_pickle(result_location + '.npy')
+            with open(result_location + '.npy', 'wb') as handle:
+                pickle.dump(node_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
             node_data.to_csv(path_or_buf=(result_location + ".csv"), index=True)
         else:
             print("dataframe is now empty, file removed ", file)
             os.remove(file)
 
-cleaned_data = next_gen.to_measurement_data()
+cleaned_data = next_gen.read_clean_data(measurement_types["loads"], measurement_types["solar"], measurement_types["batteries"])
 
 print("number of properties with data is", len(cleaned_data.keys()))
