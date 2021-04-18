@@ -110,9 +110,10 @@ def customer_financial(meas_dict: dict, node_keys: list = None, tariff: dict = N
         average = node if initiate == 0 else average.append(node)
         initiate = 1
 
-    average = numpy.nanmean(average)
-    results_dict["average"] = average
 
+    average = numpy.nanmean(average)
+
+    results_dict["average"] = average
     return results_dict
 
 
@@ -318,7 +319,8 @@ def self_sufficiency(load_p: pd.DataFrame, solar_p: pd.DataFrame, battery_p: pd.
         sum_load = numpy.nansum(load_p)
         sum_solar = numpy.nansum(solar_p)
 
-        if sum_solar < 0:
+        # it doesn't make sense to calculate this if there is no solar or the load date is missing (0.0)
+        if sum_solar < 0 and sum_load != 0:
             self_sufficiency_solar = 1 - (numpy.nansum(net_import_solar) / sum_load)
             self_sufficiency_battery = 1 - (numpy.nansum(net_import_solar_battery) / sum_load)
     else:
@@ -425,7 +427,6 @@ def self_sufficiency_self_consumption(meas_dict: dict, node_keys: list = None, c
     results_dict = {}
 
     nodes = node_keys if node_keys else meas_dict.keys()
-
 
     for key in nodes:
         if type(key) == int:
