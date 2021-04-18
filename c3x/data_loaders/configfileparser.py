@@ -195,6 +195,30 @@ class ConfigFileParser:
         print("Measurement Type list : ", measurement_types_list)
         return measurement_types_list
 
+    def read_measurement_types(self) -> list:
+        """Reads the Data Usage section from config file and converts it to a dictionary of measurement
+        types that should be used.
+
+        Values read contain:
+        - batteries = True/False
+        - solar = True/False
+        - node = True/False
+        - loads = True/False
+
+        Returns:
+            measurement_types_dict (dict): a list with measurement types to be used
+        """
+        measurement_type_dict = dict(self.config.items("Data Usage")) \
+            if "Data Usage" in self.config else {}
+
+        if measurement_type_dict:
+            measurement_type_dict["batteries"] = self.config["Data Usage"].getboolean("batteries", fallback=False)
+            measurement_type_dict["solar"] = self.config["Data Usage"].getboolean("solar", fallback=False)
+            measurement_type_dict["loads"] = self.config["Data Usage"].getboolean("loads", fallback=False)
+
+        print("Measurement Type list : ", measurement_type_dict)
+        return measurement_type_dict
+
     def read_resampling(self) -> dict:
         """Reads the resample section from config file and converts it to a dictionary that is type
         casted.
@@ -217,7 +241,7 @@ class ConfigFileParser:
 
         if resampling_dict:
             resampling_dict["resampling"] = \
-                self.config["Resample"].getboolean("resample", fallback=False)
+                self.config["Resample"].getboolean("resampling", fallback=False)
 
             resampling_dict["resampling_step"] = \
                 self.config["Resample"].getint("resampling_step")
