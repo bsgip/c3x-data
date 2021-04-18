@@ -9,6 +9,7 @@ preparation.cleaners).
 import os
 import pandas
 import numpy
+import pickle
 
 
 class NextGenData:
@@ -68,7 +69,7 @@ class NextGenData:
         if node is None:
             node = "data/node"
         if results is None:
-            results = "data/result"
+            results = "data/results"
         if stats is None:
             stats = "data/stats"
 
@@ -186,13 +187,13 @@ class NextGenData:
 
         Args:
             meas_type (str, "batteries"): The measurement type. Acceptable values are batteries,
-                solar, loads, node.
+                solar, loads, node, results.
 
         Returns
             node_ids (list): list of IDs (empty if no nodes are found).
 
         """
-        # Location and file names of incoming data set.
+
         nodes = os.listdir(self.data_dir[meas_type])
         nodes = sorted([f for f in nodes if f.endswith('.npy')])
 
@@ -202,9 +203,8 @@ class NextGenData:
             parts = node.split('_')
             if len(parts)>3:
                 node_id = node.split('_')[2]
-
-                if node_id not in node_ids:
-                    node_ids.append(node_id)
+            if node_id not in node_ids:
+                node_ids.append(node_id)
 
         return node_ids
 
@@ -261,7 +261,7 @@ class NextGenData:
             else:
                 print("measurement data for node ", node, "is empty, no file create")
 
-    def to_measurement_data(self):
+    def to_measurement_full_dataset(self):
         """Collects data to build a measuring dictionary.
 
         The data is saved to a node file with one measurement per node.
@@ -283,31 +283,78 @@ class NextGenData:
             meas_dict = {}
 
             try:
-                measurement_df_loads_temp = pandas.read_pickle(self.data_dir["loads"]
+                measurement_df_loads_temp = pandas.read_pickle(self.data_dir["results"]
                                                                + "/measurement_loads_"
                                                                + str(node_id) + "_node" + '.npy')
                 measurement_df_loads_temp.columns = ["PLG", "QLG"]
 
-                measurement_df_solar_temp = pandas.read_pickle(self.data_dir["solar"]
+                measurement_df_solar_temp = pandas.read_pickle(self.data_dir["results"]
                                                                + "/measurement_solar_"
                                                                + str(node_id) + "_node" + '.npy')
                 measurement_df_solar_temp.columns = ["PLG"]
 
-                measurement_df_batteries_temp = pandas.read_pickle(self.data_dir["batteries"]
-                                                                   + "/measurement_batteries_"
+                measurement_df_batteries_temp = pandas.read_pickle(self.data_dir["results"]
+                                                                   + "/measurement_batteries_type"
                                                                    + str(node_id) + "_node"
                                                                    + '.npy')
                 measurement_df_batteries_temp.columns = ["PLG", "QLG", "RC"]
 
-                meas_dict = {"loads_" + node_id: measurement_df_batteries_temp,
+                meas_dict = {"loads_" + node_id: measurement_df_loads_temp,
                              "solar_" + node_id: measurement_df_solar_temp,
-                             "battery_" + node_id: measurement_df_loads_temp}
+                             "battery_" + node_id: measurement_df_batteries_temp}
 
-                numpy.save(self.data_dir["results"] + "/node_" + str(node_id),
-                           meas_dict, allow_pickle=True)
+                with open(self.data_dir["results"] + "/node_" + str(node_id), 'wb') as handle:
+                    pickle.dump(meas_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
                 full_dict[node_id] = meas_dict
+
             except FileNotFoundError:
                 print("node ", node_id, " has insufficient data .. No data added to dictionary")
+
+        return full_dict
+
+    def read_clean_data(self, loads=False, solar=False, batteries=False):
+        full_dict = {}
+
+        node_ids = self.create_node_list(meas_type="results")
+
+        for node in node_ids:
+            try:
+                measurement_df_loads_temp = pandas.DataFrame()
+                measurement_df_solar_temp = pandas.DataFrame()
+                measurement_df_batteries_temp = pandas.DataFrame()
+
+                if loads == True:
+
+                    measurement_df_loads_temp = pandas.read_pickle(self.data_dir["results"]
+                                                                   + "/measurement_loads_"
+                                                                   + str(node) + "_node" + '.npy')
+                    measurement_df_loads_temp.columns = ["PLG", "QLG"]
+                    measurement_df_loads_temp.index = pandas.to_datetime(measurement_df_loads_temp.index, unit='s')
+
+                if solar == True:
+                    measurement_df_solar_temp = pandas.read_pickle(self.data_dir["results"]
+                                                                   + "/measurement_solar_"
+                                                                   + str(node) + "_node" + '.npy')
+                    measurement_df_solar_temp.columns = ["PLG"]
+                    measurement_df_solar_temp.index = pandas.to_datetime(measurement_df_solar_temp.index, unit='s')
+
+                if batteries == True:
+                    measurement_df_batteries_temp = pandas.read_pickle(self.data_dir["results"]
+                                                                       + "/measurement_batteries_"
+                                                                       + str(node) + "_node"
+                                                                       + '.npy')
+
+                    measurement_df_batteries_temp.columns = ["PLG", "QLG", "RC"]
+                    measurement_df_batteries_temp.index = pandas.to_datetime(measurement_df_batteries_temp.index, unit='s')
+
+                meas_dict = {"loads_" + node: measurement_df_loads_temp,
+                             "solar_" + node: measurement_df_solar_temp,
+                             "battery_" + node: measurement_df_batteries_temp}
+
+                full_dict[node] = meas_dict
+
+            except FileNotFoundError:
+                print("node ", node_ids, " has insufficient data .. No data added to dictionary")
 
         return full_dict
