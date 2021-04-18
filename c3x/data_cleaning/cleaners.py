@@ -54,7 +54,6 @@ def duplicates_remove(dataframe: pd.DataFrame,
         dataframe (pd.DataFrame): Dataframe without duplicates.
 
     """
-
     # index.duplicate markes all occurances as true, but for the indicated on in keep argument
     # to remove all duplicates the resulting array needs to be inverted
     if data_replacement == 'first':
@@ -74,7 +73,7 @@ def duplicates_remove(dataframe: pd.DataFrame,
 
     elif data_replacement == 'remove':
         # here all data point that are duplicates are marked true
-        index = dataframe[dataframe.duplicated(keep=False)].index
+        index = dataframe.index[dataframe.duplicated(keep=False)]
         for timestamp in index:
             # slicing returns a dataframe from start to end
             # to remove a slice from a dataframe has to be done inverted.
@@ -181,7 +180,8 @@ def handle_nans(dataframe: pd.DataFrame, data_replacement: str = 'none',
 
     elif data_replacement == 'remove':
         # gets index for wrong signs
-        index = dataframe.isna().index
+        index = dataframe.index[dataframe.isnull().any(axis=1)]
+
         # iterates through index
         for timestamp in index:
             # converts index to date time
@@ -268,6 +268,7 @@ def remove_negative_values(dataframe: pd.DataFrame, data_replacement: str = 'non
         elif data_replacement == 'remove':
             # gets index for wrong signs
             index = dataframe[(dataframe.iloc[:, coloumn_index] > 0)].index
+
             # iterates through index
             for timestamp in index:
                 # convertes index to date time
@@ -292,7 +293,6 @@ def remove_negative_values(dataframe: pd.DataFrame, data_replacement: str = 'non
 
                 elif removal_time_frame == 'all':
                     dataframe = pd.DataFrame()
-
     return dataframe
 
 
@@ -578,7 +578,6 @@ def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
     """
 
     dataframe = dataframe.sort_index()
-
     if timestamp_start is None:
         print("start index was not provided")
         timestamp_start = dataframe.first_valid_index()
@@ -586,8 +585,6 @@ def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
     if timestamp_end is None:
         print("end index is not provided")
         timestamp_end = dataframe.last_valid_index()
-
-
 
     reduced_dataframe = dataframe[(dataframe.index > timestamp_start) & (dataframe.index < timestamp_end)]
 
@@ -792,7 +789,6 @@ def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
             dataframe(pandas.Dataframe): dataframe with full index
     """
 
-    print("index dataframe", type(dataframe.index))
     if timestamp_start is None:
         print("start index was not provided")
         timestamp_start = dataframe.first_valid_index()
@@ -803,8 +799,8 @@ def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
 
     freq = str(resampling_step) + resampling_unit
 
-    range = pd.DataFrame({"Date":pd.date_range(start=timestamp_start, end=timestamp_end, freq=freq)})
-    range["timestamp"] = (range["Date"] - pd.Timestamp("1970-01-01")) // pd.Timedelta('1s')
-    delta_time_tmp = dataframe.reindex(range["timestamp"])
+    newIndex = pd.date_range(start=timestamp_start, end=timestamp_end, freq=freq)
+    newIndex = newIndex.astype(numpy.int64) // 10 ** 9
+    delta_time_tmp = dataframe.reindex(index=newIndex, fill_value=numpy.nan)
 
     return delta_time_tmp
