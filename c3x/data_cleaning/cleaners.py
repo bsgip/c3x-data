@@ -54,7 +54,7 @@ def duplicates_remove(dataframe: pd.DataFrame,
         dataframe (pd.DataFrame): Dataframe without duplicates.
 
     """
-    # index.duplicate markes all occurances as true, but for the indicated on in keep argument
+    # index.duplicate marks all occurrences as true, but for the indicated on in keep argument
     # to remove all duplicates the resulting array needs to be inverted
     if data_replacement == 'first':
         dataframe = dataframe[~dataframe.index.duplicated(keep='first')]
@@ -298,7 +298,7 @@ def remove_negative_values(dataframe: pd.DataFrame, data_replacement: str = 'non
 
 def remove_positive_values(dataframe: pd.DataFrame, data_replacement: str = 'none',
                            removal_time_frame: str = 'day', fault_placement: str = 'start',
-                           coloumn_index: int = 0) -> pd.DataFrame:
+                           column_index: int = 0) -> pd.DataFrame:
     """Handles the occurrence of positive values in a dataframe, which may be assumed
     to be faulty data points. The cleaning method can be specified using the different
     parameters.
@@ -332,24 +332,24 @@ def remove_positive_values(dataframe: pd.DataFrame, data_replacement: str = 'non
             are day, hour, all.
         fault_placement (str, 'start'): Describes where the error is placed. Acceptable values are
             start, middle, end.
-        coloumn_index(int): index of column that should be cleaned from positive values
+        column_index(int): index of column that should be cleaned from positive values
 
     Returns:
         dataframe (pd.dataframe): Dataframe with cleaned data.
 
     """
     if data_replacement == 'zero':
-        dataframe[dataframe.iloc[:, coloumn_index] > 0] = 0
+        dataframe[dataframe.iloc[:, column_index] > 0] = 0
 
     elif data_replacement == 'nan':
-        dataframe[dataframe.iloc[:, coloumn_index] > 0] = numpy.nan
+        dataframe[dataframe.iloc[:, column_index] > 0] = numpy.nan
 
     elif data_replacement == 'drop':
-        dataframe.drop(dataframe[(dataframe.iloc[:, coloumn_index] > 0)].index, inplace=True)
+        dataframe.drop(dataframe[(dataframe.iloc[:, column_index] > 0)].index, inplace=True)
 
     elif data_replacement == 'remove':
         # gets index for wrong signs
-        index = dataframe[(dataframe.iloc[:, coloumn_index] > 0)].index
+        index = dataframe[(dataframe.iloc[:, column_index] > 0)].index
         # iterates through index
         for timestamp in index:
             # converts index to date time
@@ -492,6 +492,7 @@ def find_time_range_method_day(timestamp: tuple, fault_placement: str = 'start')
 
     return int(mktime(index_date_start.timetuple())), int(mktime(index_date_end.timetuple()))
 
+
 def find_time_range_method_calendarday(timestamp: tuple):
     """"The method calculates the start and end time for a data removal.
 
@@ -511,7 +512,6 @@ def find_time_range_method_calendarday(timestamp: tuple):
 
     Args:
         timestamp (int): Timestamp in unix time around which data needs to be removed.
-        fault_placement (str, 'start'): Describes where the error is placed.
 
     Returns:
         start_time (datetime): Timestamp in datetime format ("%Y-%m-%d %H:%M") for the start time of
@@ -531,6 +531,7 @@ def find_time_range_method_calendarday(timestamp: tuple):
     index_date_end = datetime.strptime(index_date_end, "%Y-%m-%d %H:%M")
 
     return int(mktime(index_date_start.timetuple())), int(mktime(index_date_end.timetuple()))
+
 
 def slice_by_index(dataframe: pd.DataFrame, timestamp_start: int = None,
                    timestamp_end: int = None) -> pd.DataFrame:
@@ -561,7 +562,7 @@ def slice_by_index(dataframe: pd.DataFrame, timestamp_start: int = None,
 def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
                      timestamp_end: int = None) -> pd.DataFrame:
     """reduce a dataframe based on the provided times start and end timestamp. It is assumed that
-    the provided time stamp are not necessarily in the data, a approximation is used to slice as
+    the provided time stamp are not necessarily in the data, an approximation is used to slice as
     accurately as possible. If start is not provided, it is assumed to be the
     start of the data frame. If end is not provided its assumed to be the end of the data frame.
 
@@ -731,7 +732,8 @@ def data_refill(dataframe: pd.DataFrame, days: int = 7, attempts: int = 7, thres
         for block in indices_list:
             benchmark = block[2] / delta_time_tmp
             attempt = 0
-            #check for future data to refill
+
+            # check for future data to refill
             if forward_fill:
                 for iter in range(1, attempts):
                     timediff = pd.Timedelta(days, unit='D')
@@ -799,8 +801,8 @@ def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
 
     freq = str(resampling_step) + resampling_unit
 
-    newIndex = pd.date_range(start=timestamp_start, end=timestamp_end, freq=freq)
-    newIndex = newIndex.astype(numpy.int64) // 10 ** 9
-    delta_time_tmp = dataframe.reindex(index=newIndex, fill_value=numpy.nan)
+    new_index = pd.date_range(start=timestamp_start, end=timestamp_end, freq=freq)
+    new_index = new_index.astype(numpy.int64) // 10 ** 9
+    delta_time_tmp = dataframe.reindex(index=new_index, fill_value=numpy.nan)
 
     return delta_time_tmp

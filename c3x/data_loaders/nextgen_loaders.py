@@ -201,7 +201,7 @@ class NextGenData:
 
         for node in nodes:
             parts = node.split('_')
-            if len(parts)>3:
+            if len(parts) > 3:
                 node_id = node.split('_')[2]
             if node_id not in node_ids:
                 node_ids.append(node_id)
@@ -221,6 +221,7 @@ class NextGenData:
             concat_batches_start (int, 0): The batch number to start the concat at.
             concat_batches_end (int, 1): The batch number to end the concat at.
 
+        TODO: Test to make sure this works. Currently untested for node data.
         """
         batches = numpy.arange(concat_batches_start, concat_batches_end)
 

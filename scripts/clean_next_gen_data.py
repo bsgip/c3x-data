@@ -82,7 +82,7 @@ for file in data_files:
                                                         signs["data_replacement"],
                                                         signs["removal_time_frame"],
                                                         signs["fault_placement"],
-                                                        coloumn_index=0)
+                                                        column_index=0)
 
         if "load" in file and signs["wrong_sign_removal"] and not node_data.empty:
             print("remove wrong signs from load data")
