@@ -1,4 +1,5 @@
-from c3e_data_preparation.preparation import cleaners
+from c3x.data_cleaning import cleaners
+
 
 def test_timestamp_end_h():
     timestamp = 1548154800
@@ -8,6 +9,7 @@ def test_timestamp_end_h():
     assert end == timestamp, "timerange is wrong"
     assert start != timestamp, "timerange is wrong"
 
+
 def test_timestamp_start_h():
     timestamp = 1548154800
 
@@ -15,6 +17,7 @@ def test_timestamp_start_h():
 
     assert start == timestamp, "timerange is wrong"
     assert end != timestamp, "timerange is wrong"
+
 
 def test_timestamp_middle_h():
     timestamp = 1548154800
@@ -24,6 +27,7 @@ def test_timestamp_middle_h():
     assert start != timestamp, "timerange is wrong"
     assert start != timestamp, "timerange is wrong"
 
+
 def test_timestamp_end_d():
     timestamp = 1548154800
 
@@ -32,6 +36,7 @@ def test_timestamp_end_d():
     assert end == timestamp, "timerange is wrong"
     assert start != timestamp, "timerange is wrong"
 
+
 def test_timestamp_start_d():
     timestamp = 1548154800
 
@@ -39,6 +44,7 @@ def test_timestamp_start_d():
 
     assert start == timestamp, "timerange is wrong"
     assert end != timestamp, "timerange is wrong"
+
 
 def test_timestamp_middle_d():
     timestamp = 1548154800
