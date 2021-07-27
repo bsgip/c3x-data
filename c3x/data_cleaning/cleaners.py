@@ -592,7 +592,7 @@ def time_filter_data(dataframe: pd.DataFrame, timestamp_start: int = None,
     return reduced_dataframe
 
 
-def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_unit: str = 'min',
+def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_unit: str = 't',
              resampling_strategy_upsampling: str = 'first') -> pd.DataFrame:
     """Resample data to desired spacing. 
     
@@ -604,7 +604,7 @@ def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_un
     - resampling_step: This is the desired time step of final dataframe.
     - resampling_unit: The unit of desired time step. Possible units are:
     - h 	hour 	+/- 1.0e15 years 	[1.0e15 BC, 1.0e15 AD]
-    - m 	minute 	+/- 1.7e13 years 	[1.7e13 BC, 1.7e13 AD]
+    - t 	minute 	+/- 1.7e13 years 	[1.7e13 BC, 1.7e13 AD]
     - s 	second 	+/- 2.9e12 years 	[ 2.9e9 BC, 2.9e9 AD]
 
     One of the following upsampling strategies are possible
@@ -614,7 +614,7 @@ def resample(dataframe: pd.DataFrame, resampling_step: int = None, resampling_un
     Args:
         dataframe (pd.DataFrame): The dataframe to be resampled.
         resampling_step (int, 8): This is the desired time step of final dataframe.
-        resampling_unit (str, 'm'): unit of desired time step
+        resampling_unit (str, 't'): unit of desired time step
         resampling_strategy_upsampling (str, 'first', nan): Define how the upsampling is conducted.
 
     Returns:
@@ -784,7 +784,7 @@ def force_full_index(dataframe: pd.DataFrame, resampling_step: int = None,
         Args:
             dataframe(dataframe): data frame containing NaN values
             resampling_step (int, 8): This is the desired time step of final dataframe.
-            resampling_unit (str, 'M'): unit of desired time step
+            resampling_unit (str, 't'): unit of desired time step
             timestamp_start (string, none): index at which the dataframe starts
             timestamp_end (string, none): index at which the dataframe ends
         Returns

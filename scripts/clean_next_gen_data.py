@@ -16,7 +16,7 @@ from c3x.data_cleaning import cleaners
 
 ##################### Load and check data #####################
 
-config = configfileparser.ConfigFileParser("config/example_for_cleaning.ini")
+config = configfileparser.ConfigFileParser("./scripts/config/example_for_cleaning.ini")
 
 data_paths = config.read_data_path()
 batch_info = config.read_batches()
@@ -24,7 +24,7 @@ data_usage = config.read_data_usage()
 
 # Create a nextGen data object that has working paths and can be sliced using batches
 next_gen = nextgen_loaders.NextGenData(data_name='NextGen',
-                                       source =data_paths["source"],
+                                       source=data_paths["source"],
                                        batteries=data_paths["batteries"],
                                        solar=data_paths["solar"],
                                        node=data_paths["node"],
@@ -51,7 +51,7 @@ nan_handling = config.read_nan_handeling()
 resampling = config.read_resampling()
 measurement_types = config.read_measurement_types()
 
-# generate a file list that needs cleaning (only node data is considered e.G. concatenated data)
+# generate a file list that needs cleaning (only node data is considered eg. concatenated data)
 data_path_list = []
 data_files = []
 
@@ -68,14 +68,12 @@ for file in data_files:
         if time["time_filter_use"]:
             print("slice dataframe to user specified time range")
             node_data = cleaners.time_filter_data(node_data, int(mktime(time["start_time"].timetuple())), int(mktime(time["end_time"].timetuple())))
-
         if duplicates["duplicate_removal"] and not node_data.empty:
             print("remove duplicates from time frame")
             node_data = cleaners.duplicates_remove(node_data,
                                                    duplicates["data_replacement"],
                                                    duplicates['removal_time_frame'],
                                                    duplicates["fault_placement"])
-
         if "solar" in file and signs["wrong_sign_removal"] and not node_data.empty:
             print("remove wrong signs from solar data")
             node_data = cleaners.remove_positive_values(node_data,
@@ -83,38 +81,31 @@ for file in data_files:
                                                         signs["removal_time_frame"],
                                                         signs["fault_placement"],
                                                         column_index=0)
-
         if "load" in file and signs["wrong_sign_removal"] and not node_data.empty:
             print("remove wrong signs from load data")
-
             node_data = cleaners.remove_negative_values(node_data,
                                                         signs["data_replacement"],
                                                         signs["removal_time_frame"],
                                                         signs["fault_placement"],
                                                         coloumn_index=0)
-
-
         if nan_handling["nan_removal"] and not node_data.empty:
             print("remove nans from time frame")
             node_data = cleaners.handle_nans(node_data,
                                              nan_handling["data_replacement"],
                                              nan_handling["removal_time_frame"],
                                              nan_handling["fault_placement"])
-
         if resampling["resampling"] and not node_data.empty:
             print("resampling node data")
             node_data = cleaners.resample(node_data,
                                           resampling_step=resampling["resampling_step"],
                                           resampling_unit=resampling["resampling_unit"],
                                           resampling_strategy_upsampling=resampling["resampling_strategy_upsampling"])
-
         print("forcing full index")
         node_data = cleaners.force_full_index(node_data,
                                             resampling_step=resampling["resampling_step"],
                                             resampling_unit=resampling["resampling_unit"],
                                             timestamp_start=time["start_time"],
                                             timestamp_end=time["end_time"])
-
         if not node_data.empty:
             path = file.split("/")
             filename = path[len(path)-1].split(".")[0]
