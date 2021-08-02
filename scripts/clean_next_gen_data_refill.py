@@ -17,7 +17,7 @@ from c3x.data_cleaning import cleaners
 ##################### Load and check data #####################
 
 # config = configfileparser.ConfigFileParser("config/cleaning_for_dan.ini")
-config = configfileparser.ConfigFileParser("config/example_for_refill.ini")
+config = configfileparser.ConfigFileParser("./scripts/config/example_for_refill.ini")
 
 data_paths = config.read_data_path()
 batch_info = config.read_batches()
