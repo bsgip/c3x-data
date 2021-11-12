@@ -57,6 +57,11 @@ duplicates, NaN (via refill with other data or "simple") and removing unwanted t
 The refill function can be used tp replace chunks of missing data. It looks for a better suited 
 data block based on users specification (see scripts/config for example)
 
+Installation
+---------
+```
+pip install .
+```
    
 
 
